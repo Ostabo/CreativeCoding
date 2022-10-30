@@ -15,7 +15,7 @@ function setup() {
   });
   text(peaks.size, 20, 20);
 
-    mySound.play();
+  mySound.play();
 }
 
 function draw() {
