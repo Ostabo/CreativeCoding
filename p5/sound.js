@@ -1,8 +1,10 @@
-let sound;
-let fft;
+let sound, fft;
+
 function preload() {
   soundFormats('mp3', 'ogg');
-  sound = loadSound('../Vorlesung/Mario Batkovic_Accordion_ausschnitt');
+  //sound = loadSound('../Vorlesung/Mario Batkovic_Accordion_ausschnitt');
+  //sound = loadSound('../Vorlesung/outro-song');
+  sound = loadSound('../Vorlesung/clapping');
 }
 
 function setup() {
@@ -14,29 +16,18 @@ function setup() {
 }
 
 function draw() {
-  background(150);
+  background(20);
 
   let spectrum = fft.analyze();
-  noStroke();
-  fill(0);
-  for (let i = 0; i< spectrum.length; i++){
-    let x = map(i, 0, spectrum.length, 0, width * 2);
-    let y = map(i, 0, spectrum.length, 0, height * 2);
-    let h = -height + map(spectrum[i], 0, 255, height, 0);
-    circle(x, y, h);
-  }
 
-  let waveform = fft.waveform();
-  noFill();
-  beginShape();
   stroke(255);
-  strokeWeight(2);
-  for (let i = 0; i< waveform.length; i++){
-    let x = map(i, 0, waveform.length, 0, width);
-    let y = map( waveform[i], -1, 1, 0, height);
-    point(x,y);
+  for (let i = 0; i < spectrum.length; i++){
+    let h = map(spectrum[i], 0, 255, 0, min(width, height) / 2)
+     + min(width, height) / 10;
+    line(width / 2, height / 2,
+      h * sin(PI + (TWO_PI / 360) * i) + width / 2,
+      h * cos(PI + (TWO_PI / 360) * i) + height / 2);
   }
-  endShape();
 }
 
 function togglePlay() {
