@@ -1,5 +1,6 @@
 let baseRadius, sound, fft, img, peakDetect;
 let ellipseWidth = 10;
+let pointCount;
 
 function preload() {
   soundFormats('mp3', 'ogg');
@@ -62,7 +63,12 @@ function draw() {
 
   translate(width / 2, height / 2);
   rotate(frameCount);
-  polygon(0, 0, ellipseWidth, random(3, 8));
+
+  if (frameCount == 0 || frameCount % 60 == 0) {
+    pointCount = random(2, 8);
+  }
+
+  polygon(0, 0, ellipseWidth, pointCount);
   circle(0, 0, ellipseWidth, ellipseWidth);
 
 }
