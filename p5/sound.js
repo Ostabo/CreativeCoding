@@ -13,7 +13,8 @@ function preload() {
 }
 
 function setup() {
-  const canvas = createCanvas(windowWidth, windowHeight);
+  const canvasSize = min(windowWidth, windowHeight)
+  const canvas = createCanvas(canvasSize, canvasSize);
   canvas.mouseClicked(togglePlay);
 
   image(img, 0, 0, width, height);
@@ -35,10 +36,13 @@ function draw() {
 
   let sat = 150;
   for (let i = 0; i < spectrum.length; i++){
+    
     stroke(i, sat, 360);
+    //stroke(i * spectrum.length % 360, sat, 360);
 
     if (spectrum[i] > 100) {
       stroke(i, sat++, 360);
+      //stroke(i * spectrum.length % 360, sat++, 360);
     }
 
     let h = map(spectrum[i], 0, 255, 0, min(width, height) / 3)
