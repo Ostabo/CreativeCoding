@@ -8,11 +8,8 @@ function preload() {
 function setup() {
     canvasSize = min(windowWidth, windowHeight)
     createCanvas(canvasSize, canvasSize);
-    background(10);
+    background(250);
     textSize(20);
-    strokeWeight(1);
-    stroke(0);
-    //noStroke();
     textAlign(CENTER, CENTER);
 
     const textRes = input.join();
@@ -20,6 +17,14 @@ function setup() {
     console.log(textRes);
 
     const tokens = RiTa.tokenize(textRes);
+    const tokenNeighborMap = new Map();
+    for (let i = 0; i < tokens.length - 1; i++) {
+        const token = tokens[i];
+        const nextToken = tokens[i + 1];
+        if (!tokenNeighborMap.has(token)) {
+            tokenNeighborMap.set(token, nextToken);
+        }
+    }
 
     let sizeMap = new Map();
     let phoMap = new Map();
@@ -34,9 +39,12 @@ function setup() {
         }
     });
 
+    const coordsPerToken = new Map();
+
     const maxS = Math.max(...sizeMap.values());
     sizeMap = new Map([...sizeMap.entries()].sort().reverse());
     const maxP = Math.max(...phoMap.values());
+
     sizeMap.forEach((value, key) => {
         const size = map(value, 0, maxS, 0, canvasSize / 2);
 
@@ -48,13 +56,35 @@ function setup() {
             random(size + offset, canvasSize - size - offset),
             random(size + offset, canvasSize - size - offset)
         ];
-    
+        coordsPerToken.set(key, [x, y]);
+    });
+
+    tokenNeighborMap.forEach((value, key) => {
+
+        if (coordsPerToken.has(key) && coordsPerToken.has(value)) {
+            const [x1, y1] = coordsPerToken.get(key);
+            const [x2, y2] = coordsPerToken.get(value);
+            colorMode(HSB, 100);
+            stroke(mapWordTypeToColor(key), 100, 30);
+            line(x1, y1, x2, y2);
+        }
+    });
+
+    //noStroke();
+    stroke(0);
+
+    sizeMap.forEach((value, key) => {
+        const size = map(value, 0, maxS, 0, canvasSize / 2);
+
         colorMode(HSB, 100);
         fill(mapWordTypeToColor(key), 100, 100);
         //circle(x, y, size);
         //fill(255);
         textSize(value > 1 ? size / 4 : 1);
+
+        const [x, y] = coordsPerToken.get(key);
         text(key, x, y);
+
     });
 }
 
