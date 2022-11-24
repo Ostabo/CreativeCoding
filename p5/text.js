@@ -2,7 +2,8 @@ let canvasSize;
 let input = "";
 
 function preload() {
-    input = loadStrings("rapgod.txt");
+    //input = loadStrings("rapgod.txt");
+    input = loadStrings("poem.txt");
 }
 
 function setup() {
@@ -16,7 +17,7 @@ function setup() {
 
     console.log(textRes);
 
-    const tokens = RiTa.tokenize(textRes);
+    const tokens = RiTa.tokenize(textRes).map(x => x.toUpperCase());
     const tokenNeighborMap = new Map();
     for (let i = 0; i < tokens.length - 1; i++) {
         const token = tokens[i];
