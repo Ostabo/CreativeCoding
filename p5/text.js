@@ -6,8 +6,8 @@ const strokeC = 255;
 let phonemeToFont;
 
 function preload() {
-    input = loadStrings("rapgod.txt");
-    //input = loadStrings("poem.txt");
+    //input = loadStrings("rapgod.txt");
+    input = loadStrings("poem.txt");
 }
 
 function setup() {
