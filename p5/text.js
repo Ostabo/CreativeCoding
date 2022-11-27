@@ -1,14 +1,65 @@
 let canvasSize;
 let input = "";
+const backgroundC = 0;
+const strokeC = 255;
+
+let phonemeToFont;
 
 function preload() {
     input = loadStrings("rapgod.txt");
+    //input = loadStrings("poem.txt");
 }
 
 function setup() {
     canvasSize = min(windowWidth, windowHeight)
     createCanvas(canvasSize, canvasSize);
-    background(250);
+
+    phonemeToFont = {
+        "AE": ITALIC,
+        "AH": BOLD,
+        "AO": BOLDITALIC,
+        "AW": BOLDITALIC,
+        "AY": NORMAL,
+        "B": BOLD,
+        "CH": ITALIC,
+        "D": ITALIC,
+        "DH": BOLD,
+        "EH": BOLDITALIC,
+        "ER": NORMAL,
+        "EY": ITALIC,
+        "F": BOLD,
+        "G": BOLDITALIC,
+        "HH": NORMAL,
+        "IH": ITALIC,
+        "IY": BOLD,
+        "JH": BOLDITALIC,
+        "K": NORMAL,
+        "L": ITALIC,
+        "M": ITALIC,
+        "N": BOLD,
+        "NG": BOLDITALIC,
+        "OW": NORMAL,
+        "OY": ITALIC,
+        "P": BOLD,
+        "R": BOLDITALIC,
+        "S": NORMAL,
+        "SH": ITALIC,
+        "T": BOLD,
+        "TH": BOLDITALIC,
+        "UH": NORMAL,
+        "UW": ITALIC,
+        "V": BOLD,
+        "W": BOLDITALIC,
+        "Y": NORMAL,
+        "Z": ITALIC,
+        "ZH": BOLD
+    };
+  
+    drawWords();
+}
+
+function drawWords() {
+  background(backgroundC);
     textSize(20);
     textAlign(CENTER, CENTER);
 
@@ -16,7 +67,7 @@ function setup() {
 
     console.log(textRes);
 
-    const tokens = RiTa.tokenize(textRes);
+    const tokens = RiTa.tokenize(textRes).map(x => x.toUpperCase());
     const tokenNeighborMap = new Map();
     for (let i = 0; i < tokens.length - 1; i++) {
         const token = tokens[i];
@@ -71,7 +122,7 @@ function setup() {
     });
 
     //noStroke();
-    stroke(0);
+    stroke(strokeC);
 
     sizeMap.forEach((value, key) => {
         const size = map(value, 0, maxS, 0, canvasSize / 2);
@@ -80,7 +131,11 @@ function setup() {
         fill(mapWordTypeToColor(key), 100, 100);
         //circle(x, y, size);
         //fill(255);
-        textSize(value > 1 ? size / 4 : 1);
+        textSize(value >= 1 ? size / 4 : 1);
+      
+        const pho = RiTa.phones(key);
+        const s = phonemeToFont[pho.split("-")[0].toUpperCase()];
+        textStyle(s ? s : NORMAL); 
 
         const [x, y] = coordsPerToken.get(key);
         text(key, x, y);
@@ -108,4 +163,4 @@ function mapWordTypeToColor(word) {
     }
     return 60;
 }
-  
+    
