@@ -1,5 +1,15 @@
 let canvasSize;
 let input = "";
+const backgroundC = 255;
+const strokeC = 0;
+
+let dirXMap = new Map();
+let dirYMap = new Map();
+let sizeMap = new Map();
+const coordsPerToken = new Map();
+
+const tokenNeighborMap = new Map();
+let phonemeToFont;
 
 function preload() {
     //input = loadStrings("rapgod.txt");
@@ -9,7 +19,118 @@ function preload() {
 function setup() {
     canvasSize = min(windowWidth, windowHeight)
     createCanvas(canvasSize, canvasSize);
-    background(250);
+
+    phonemeToFont = {
+        "AE": ITALIC,
+        "AH": BOLD,
+        "AO": BOLDITALIC,
+        "AW": BOLDITALIC,
+        "AY": NORMAL,
+        "B": BOLD,
+        "CH": ITALIC,
+        "D": ITALIC,
+        "DH": BOLD,
+        "EH": BOLDITALIC,
+        "ER": NORMAL,
+        "EY": ITALIC,
+        "F": BOLD,
+        "G": BOLDITALIC,
+        "HH": NORMAL,
+        "IH": ITALIC,
+        "IY": BOLD,
+        "JH": BOLDITALIC,
+        "K": NORMAL,
+        "L": ITALIC,
+        "M": ITALIC,
+        "N": BOLD,
+        "NG": BOLDITALIC,
+        "OW": NORMAL,
+        "OY": ITALIC,
+        "P": BOLD,
+        "R": BOLDITALIC,
+        "S": NORMAL,
+        "SH": ITALIC,
+        "T": BOLD,
+        "TH": BOLDITALIC,
+        "UH": NORMAL,
+        "UW": ITALIC,
+        "V": BOLD,
+        "W": BOLDITALIC,
+        "Y": NORMAL,
+        "Z": ITALIC,
+        "ZH": BOLD
+    };
+  
+    drawWords();
+}
+
+function draw() {
+  background(backgroundC);
+  const maxS = Math.max(...sizeMap.values());
+
+  tokenNeighborMap.forEach((value, key) => {
+
+        if (coordsPerToken.has(key) && coordsPerToken.has(value)) {
+            const [x1, y1] = coordsPerToken.get(key);
+            const [x2, y2] = coordsPerToken.get(value);
+            colorMode(HSB, 100);
+            stroke(mapWordTypeToColor(key), 100, 30);
+            line(x1, y1, x2, y2);
+        }
+    });
+  
+  sizeMap.forEach((value, key) => {
+        const size = map(value, 0, maxS, 0, canvasSize / 2);
+
+        textSize(value >= 1 ? size / 4 : 1);
+      
+        const pho = RiTa.phones(key);
+        const s = phonemeToFont[pho.split("-")[0].toUpperCase()];
+        textStyle(s ? s : NORMAL); 
+
+        let [x, y] = coordsPerToken.get(key);
+        if (x + 1 >= canvasSize - size / 2) {
+          x -= 1
+          dirXMap.set(key, -1)
+        }
+        else if (x - 1 <= size / 2) {
+          x += 1;
+          dirXMap.set(key, 1)
+        }
+        else {
+          x += 1 * dirXMap.get(key) ? dirXMap.get(key) : 1;
+        }
+    
+        if (y + 1 >= canvasSize - size / 2) {
+          y -= 1
+          dirYMap.set(key, -1)
+        }
+        else if (y - 1 <= size / 2) {
+          y += 1;
+          dirYMap.set(key, 1)
+        }
+        else {
+          y += 1 * dirYMap.get(key) ? dirYMap.get(key) : 1;
+        }
+        coordsPerToken.set(key, [x, y])
+          
+    
+        fill('transparent')
+        //fill(strokeC);
+        //fill(backgroundC);
+        //circle(x, y, size);
+        rect(x, y, size)
+        colorMode(HSB, 100);
+        fill(mapWordTypeToColor(key), 100, 100);
+        rectMode(CENTER);
+        text(key, x, y);
+
+    });
+  
+}
+
+function drawWords() {
+  background(backgroundC);
     textSize(20);
     textAlign(CENTER, CENTER);
 
@@ -18,7 +139,6 @@ function setup() {
     console.log(textRes);
 
     const tokens = RiTa.tokenize(textRes).map(x => x.toUpperCase());
-    const tokenNeighborMap = new Map();
     for (let i = 0; i < tokens.length - 1; i++) {
         const token = tokens[i];
         const nextToken = tokens[i + 1];
@@ -27,7 +147,6 @@ function setup() {
         }
     }
 
-    let sizeMap = new Map();
     let phoMap = new Map();
     tokens.forEach((token) => {
         let amount = sizeMap.has(token) ? sizeMap.get(token) : 0;
@@ -40,7 +159,6 @@ function setup() {
         }
     });
 
-    const coordsPerToken = new Map();
 
     const maxS = Math.max(...sizeMap.values());
     sizeMap = new Map([...sizeMap.entries()].sort().reverse());
@@ -72,18 +190,25 @@ function setup() {
     });
 
     //noStroke();
-    stroke(0);
+    stroke(strokeC);
 
     sizeMap.forEach((value, key) => {
         const size = map(value, 0, maxS, 0, canvasSize / 2);
 
-        colorMode(HSB, 100);
-        fill(mapWordTypeToColor(key), 100, 100);
-        //circle(x, y, size);
-        //fill(255);
-        textSize(value > 1 ? size / 4 : 1);
+        textSize(value >= 1 ? size / 4 : 1);
+      
+        const pho = RiTa.phones(key);
+        const s = phonemeToFont[pho.split("-")[0].toUpperCase()];
+        textStyle(s ? s : NORMAL); 
 
         const [x, y] = coordsPerToken.get(key);
+        fill('transparent')
+        //circle(x, y, size);
+        rect(x, y, size)
+        colorMode(HSB, 100);
+        fill(mapWordTypeToColor(key), 100, 100);
+        rectMode(CENTER);
+        //fill(strokeC);
         text(key, x, y);
 
     });
@@ -109,4 +234,3 @@ function mapWordTypeToColor(word) {
     }
     return 60;
 }
-  
