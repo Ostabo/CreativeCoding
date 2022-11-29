@@ -64,7 +64,15 @@ function setup() {
     drawWords();
 }
 
+window.onclick = () => {
+  frameRate(frameRate() === 0 ? 60 : 0);
+}
+
 function draw() {
+  drawForms();
+}
+
+function drawForms() {
   background(backgroundC);
   const maxS = Math.max(...sizeMap.values());
 
@@ -126,7 +134,6 @@ function draw() {
         text(key, x, y);
 
     });
-  
 }
 
 function drawWords() {
