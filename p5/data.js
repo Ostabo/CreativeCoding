@@ -22,6 +22,7 @@ function preload() {
 
 let w, h, size
 let sliderX, sliderZ, sliderPosX, sliderPosY, sliderPosZ, sliderSize, sliderYear
+let states 
 
 const headers = [
     "Date",
@@ -35,7 +36,14 @@ function setup() {
     size = min(w, h) / 15
     createCanvas(w, h, WEBGL)
 
+    colorMode(HSB, 360)
     angleMode(DEGREES)
+
+    let heading = createDiv("Mass Shootings in the US")
+    heading.style("color", "white")
+    heading.style("font-size", "2em")
+    heading.style("background-color", "black")
+    heading.position(20, h - 50)
 
     let label = createDiv("Rotation + Size")
     label.style("color", "white")
@@ -65,6 +73,39 @@ function setup() {
     sliderPosY.position(220, 80)
     sliderPosZ = createSlider(-1000, 1000, 0)
     sliderPosZ.position(220, 110)
+
+    const img = createImg('arrows.png')
+    img.position(w - 120, 20)
+    img.size(100, 100)
+    img.style("filter", "invert(1)")
+    let label4 = createDiv("Deaths")
+    label4.style("color", "white")
+    label4.style("background-color", "black")
+    label4.position(w - 150, 30)
+    let label5 = createDiv("Wounded")
+    label5.style("color", "white")
+    label5.style("background-color", "black")
+    label5.position(w - 160, 90)
+
+    states = createDiv()
+    states.style("display", "grid")
+    states.style("grid-template-columns", "repeat(12, 1fr)")
+    //states.style("gap", "1vmax")
+    states.style("font-family", "monospace")
+    states.position(w - w / 3, h - h / 6)
+
+
+    for (const key in stateToColorMap) {
+        if (Object.hasOwnProperty.call(stateToColorMap, key) && key !== 'undefined') {
+            const element = stateToColorMap[key];
+            const [r, g, b] = [red(element), green(element), blue(element)]
+            
+            const legend = createDiv(key)
+            legend.style("background", `rgb(${r}, ${g}, ${b})`)
+            legend.style("padding", ".5vmin")
+            legend.parent(states)
+        }
+    }
 
 }
 
@@ -104,16 +145,34 @@ function draw() {
         for (let j = 0; j < yearMap[i]; j++) {
 
             const current = displayData.filter(d => d.month === i && d.day === j + 1)
-            if (current.length > 0) {
-                const { color, killed, wounded } = current[0]
+            
+            if (current.length > 1)
+                translate(0, - .5 * size / current.length, 0)
+
+            current.forEach(e => {
+                const { color, killed, wounded } = e
+
                 fill(color)
+
                 translate(0, 0, size * wounded / 2)
-                box(size, size, size * wounded)
+
+                rotateX(90)
+                rotateY(45)
+                cone(size / 1.5 / current.length, size * wounded, 5)
+                rotateY(-45)
+                rotateX(-90)
+
                 translate(0, 0, -size * wounded / 2)
                 translate(0, 0, -size * killed / 2)
-                box(size, size, size * killed)
+                box(size, size / current.length, size * killed)
                 translate(0, 0, size * killed / 2)
-            }
+
+                if (current.length > 1)
+                    translate(0, size / current.length, 0)
+            })
+            if (current.length > 1)
+                translate(0, (-current.length + 0.5) * size / current.length, 0)
+
             const dayOfWeek = new Date(sliderYear.value(), i, j + 1).getDay()
             fill(dayOfWeekColorMap[dayOfWeek])
             noStroke()
@@ -137,69 +196,57 @@ const dayOfWeekColorMap = {
 }
 
 const stateToColorMap = {
-    "AL": "#FF0000",
-    "AK": "#FF7F00",
-    "AZ": "#FFFF00",
-    "AR": "#00FF00",
-    "CA": "#00FFFF",
-    "CO": "#0000FF",
-    "CT": "#8B00FF",
-    "DE": "#FF0000",
-    "FL": "#FF7F00",
-    "GA": "#FFFF00",
-    "HI": "#00FF00",
-    "ID": "#00FFFF",
-    "IL": "#0000FF",
-    "IN": "#8B00FF",
-    "IA": "#FF0000",
-    "KS": "#FF7F00",
-    "KY": "#FFFF00",
-    "LA": "#00FF00",
-    "ME": "#00FFFF",
-    "MD": "#0000FF",
-    "MA": "#8B00FF",
-    "MI": "#FF0000",
-    "MN": "#FF7F00",
-    "MS": "#FFFF00",
-    "MO": "#00FF00",
-    "MT": "#00FFFF",
-    "NE": "#0000FF",
-    "NV": "#8B00FF",
-    "NH": "#FF0000",
-    "NJ": "#FF7F00",
-    "NM": "#FFFF00",
-    "NY": "#00FF00",
-    "NC": "#00FFFF",
-    "ND": "#0000FF",
-    "OH": "#8B00FF",
-    "OK": "#FF0000",
-    "OR": "#FF7F00",
-    "PA": "#FFFF00",
-    "RI": "#00FF00",
-    "SC": "#00FFFF",
-    "SD": "#0000FF",
-    "TN": "#8B00FF",
-    "TX": "#FF0000",
-    "UT": "#FF7F00",
-    "VT": "#FFFF00",
-    "VA": "#00FF00",
-    "WA": "#00FFFF",
-    "WV": "#0000FF",
-    "WI": "#8B00FF",
-    "WY": "#FF0000",
-    "DC": "#FF7F00",
-    "AS": "#FFFF00",
-    "GU": "#00FF00",
-    "MP": "#00FFFF",
-    "PR": "#0000FF",
-    "VI": "#8B00FF",
-    "UM": "#FF0000",
-    "FM": "#FF7F00",
-    "MH": "#FFFF00",
-    "PW": "#00FF00",
-    "AA": "#00FFFF",
-    "AE": "#0000FF",
-    "AP": "#8B00FF",
-    undefined: "#FFFFFF"
+    "AL": [0, 360, 360],
+    "AK": [30, 360, 360],
+    "AZ": [60, 360, 360],
+    "AR": [90, 360, 360],
+    "CA": [120, 360, 360],
+    "CO": [150, 360, 360],
+    "CT": [180, 360, 360],
+    "DE": [210, 360, 360],
+    "FL": [240, 360, 360],
+    "GA": [270, 360, 360],
+    "HI": [300, 360, 360],
+    "ID": [330, 360, 360],
+    "IL": [0, 290, 360],
+    "IN": [30, 290, 360],
+    "IA": [60, 290, 360],
+    "KS": [90, 290, 360],
+    "KY": [120, 290, 360],
+    "LA": [150, 290, 360],
+    "ME": [180, 290, 360],
+    "MD": [210, 290, 360],
+    "MA": [240, 290, 360],
+    "MI": [270, 290, 360],
+    "MN": [300, 290, 360],
+    "MS": [330, 290, 360],
+    "MO": [0, 200, 360],
+    "MT": [30, 200, 360],
+    "NE": [60, 200, 360],
+    "NV": [90, 200, 360],
+    "NH": [120, 200, 360],
+    "NJ": [150, 200, 360],
+    "NM": [180, 200, 360],
+    "NY": [210, 200, 360],
+    "NC": [240, 200, 360],
+    "ND": [270, 200, 360],
+    "OH": [300, 200, 360],
+    "OK": [330, 200, 360],
+    "OR": [0, 110, 360],
+    "PA": [30, 110, 360],
+    "RI": [60, 110, 360],
+    "SC": [90, 110, 360],
+    "SD": [120, 110, 360],
+    "TN": [150, 110, 360],
+    "TX": [180, 110, 360],
+    "UT": [210, 110, 360],
+    "VT": [240, 110, 360],
+    "VA": [270, 110, 360],
+    "WA": [300, 110, 360],
+    "WV": [330, 110, 360],
+    "WI": [0, 50, 360],
+    "WY": [30, 50, 360],
+    "DC": [60, 50, 360],
+    undefined: [90, 50, 360]
 }
     
