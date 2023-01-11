@@ -27,7 +27,7 @@ function draw() { // Draw runs in a loop
     colorMode(HSB, 100);
     fill(sliderC.value(), 100, 100);
         
-    polygon(0, 0, scale, sliderN.value());
+    polygon(0, 0, scaleUp, sliderN.value());
     pop();
 }
 

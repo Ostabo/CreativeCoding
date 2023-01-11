@@ -63,7 +63,7 @@ function setup() {
 function draw() {
 }
 let first = true
-const scale = 100
+const scaleUp = 10
 let labelCache = []
 function drawStats() {
     if (labelCache.length > 0) 
@@ -78,9 +78,8 @@ function drawStats() {
 
     //myMap.map.setMaxBounds(maxBounds)
     //myMap.map.fitBounds(maxBounds)
-    myMap.map.setMinZoom(3)
+    myMap.map.setMinZoom(4)
     myMap.map.setMaxZoom(10)
-    console.log(myMap.map.getZoom() + " " + myMap.map.zoomSnap)
     curZoom = myMap.zoom()
     clear()
     data.getRows().filter(row => {
@@ -91,8 +90,8 @@ function drawStats() {
         const pos = myMap.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
         
         fill(255,0,0)
-        const r_killed = sqrt(e.get(headers[1]) * scale) / PI * curZoom
-        const r_wounded = sqrt(e.get(headers[2]) * scale) / PI * curZoom
+        const r_killed = sqrt(e.get(headers[1])) / PI * scaleUp * curZoom
+        const r_wounded = sqrt(e.get(headers[2])) / PI * scaleUp * curZoom
         if (r_wounded == 0)
             ellipse(pos.x, pos.y, r_killed, r_killed)
         else 
