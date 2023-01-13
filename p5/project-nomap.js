@@ -33,20 +33,11 @@ let sliderYear;
 function setup() {
     canvas = createCanvas(windowWidth, windowHeight);
 
-    let label2 = createDiv("Year (2009 - 2022)")
-    label2.style("color", "white")
-    label2.style("background-color", "black")
-    label2.style("z-index", "2000")
-    label2.position(windowWidth / 2 - 80, windowHeight - 80)
-    sliderYear = createSlider(2009, 2022, 0)
-    sliderYear.position(windowWidth / 2 - 100, windowHeight - 60)
-    sliderYear.style("z-index", "2000")
-    sliderYear.input(drawStats)
-
     myMap = mappa.tileMap(options);
 
     myMap.overlay(canvas);
     myMap.onChange(drawStats)
+  
 }
 
 function draw() {
@@ -55,27 +46,13 @@ let first = true
 const scaleUp = 10
 let labelCache = []
 function drawStats() {
-    if (labelCache.length > 0) 
-        labelCache.forEach(l => l.remove())
 
-    let labelCur = createDiv(sliderYear.value())
-    labelCur.style("color", "white")
-    labelCur.style("background-color", "black")
-    labelCur.style("z-index", "2000")
-    labelCur.position(windowWidth / 2 - 35, windowHeight - 40)
-    labelCache.push(labelCur)
-
-    //myMap.map.setMaxBounds(maxBounds)
-    //myMap.map.fitBounds(maxBounds)
     myMap.map.setMinZoom(4)
-    myMap.map.setMaxZoom(10)
+    myMap.map.setMaxZoom(4)
     curZoom = myMap.zoom()
     clear()
-    data.getRows().filter(row => {
-        return new Date(
-            row.get(headers[6])
-            ).getFullYear() === sliderYear.value()
-        }).forEach(e => {
+    background(255)
+    data.getRows().forEach(e => {
         const pos = myMap.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
         
         fill(255,0,0)
@@ -83,11 +60,14 @@ function drawStats() {
         const r_wounded = sqrt(e.get(headers[2])) / PI * scaleUp * curZoom
         if (r_wounded == 0)
             ellipse(pos.x, pos.y, r_killed, r_killed)
+          //rect(pos.x, pos.y, r_killed, r_killed)
         else 
             arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+          //rect(pos.x, pos.y, r_killed, r_killed)
       
         fill(255,200,200)
         arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
+        //rect(pos.x, pos.y, r_wounded, r_wounded)
 
         const nar = e.get(headers[5])
         if (curZoom > 5) {
