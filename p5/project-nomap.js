@@ -1,7 +1,8 @@
-let data
+let data, dataGer
 
 function preload() {
     data = loadTable('everytownresearch-massshootings.csv', 'csv', 'header');
+    dataGer = loadTable('germany-massshootings.csv', 'csv', 'header');
 }
 const headers = [
     "Address",
@@ -22,8 +23,8 @@ const maxBounds = [
     [71.927675, -71.101668]  //Northeast
 ];
 const options = {
-    lat: 39,
-    lng: -96,
+    lat: 40,
+    lng: -86,
     zoom: curZoom,
     // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
     style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
@@ -46,6 +47,10 @@ let first = true
 const scaleUp = 10
 let labelCache = []
 function drawStats() {
+    myMap.map.zoomControl.remove()
+
+    if (labelCache.length > 0) 
+        labelCache.forEach(l => l.remove())
 
     myMap.map.setMinZoom(4)
     myMap.map.setMaxZoom(4)
@@ -66,6 +71,51 @@ function drawStats() {
           //rect(pos.x, pos.y, r_killed, r_killed)
       
         fill(255,200,200)
+        arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
+        //rect(pos.x, pos.y, r_wounded, r_wounded)
+
+        const nar = e.get(headers[5])
+        if (curZoom > 5) {
+            let narLabel = createDiv(nar)
+            narLabel.class("label")
+            narLabel.style("color", "white")
+            narLabel.style("background-color", "black")
+            narLabel.style("width", 40 * curZoom + "px")
+            narLabel.style("font-size", curZoom * 2 + "px")
+            narLabel.style("z-index", "2000")
+            narLabel.style("text-align", "center")
+            narLabel.style("padding", "5px")
+            narLabel.style("border-radius", "5px")
+            narLabel.style("transform", "translate(-50%, -50%)")
+            narLabel.style("user-select", "none")
+            narLabel.style("opacity", "0")
+            narLabel.position(pos.x, pos.y)
+
+            labelCache.push(narLabel)
+        }   
+    })
+
+    const [yOffset, lngOffset] = [200.0, -65.0]
+    dataGer.getRows().forEach(e => {
+        const pos = myMap.latLngToPixel(
+            float(e.get(headers[3])),
+            float(e.get(headers[4])) + lngOffset
+        );
+
+        pos.y = pos.y + yOffset
+
+        fill(0,255,0)
+        const r_killed = sqrt(e.get(headers[1])) / PI * scaleUp * curZoom
+        const r_wounded = sqrt(e.get(headers[2])) / PI * scaleUp * curZoom
+
+        if (r_wounded == 0)
+            ellipse(pos.x, pos.y, r_killed, r_killed)
+          //rect(pos.x, pos.y, r_killed, r_killed)
+        else 
+            arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+          //rect(pos.x, pos.y, r_killed, r_killed)
+      
+        fill(200,255,200)
         arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
         //rect(pos.x, pos.y, r_wounded, r_wounded)
 
