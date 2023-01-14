@@ -23,7 +23,7 @@ const maxBounds = [
     [71.927675, -71.101668]  //Northeast
 ];
 const options = {
-    lat: 40,
+    lat: 30,
     lng: -86,
     zoom: curZoom,
     // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
@@ -43,6 +43,14 @@ function setup() {
 
 function draw() {
 }
+
+const c1 = [255,0,0]
+const c2 = [255,200,200]
+const c3 = [0,255,0]
+const c4 = [200,255,200]
+const c5 = [200,0,0]
+const c6 = [200,200,0]
+
 let first = true
 const scaleUp = 10
 let labelCache = []
@@ -57,12 +65,20 @@ function drawStats() {
     curZoom = myMap.zoom()
     clear()
     background(255)
+  
+    let usaKilled = 0;
+    let usaWounded = 0;
+  
     data.getRows().forEach(e => {
         const pos = myMap.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
         
-        fill(255,0,0)
-        const r_killed = sqrt(e.get(headers[1])) / PI * scaleUp * curZoom
-        const r_wounded = sqrt(e.get(headers[2])) / PI * scaleUp * curZoom
+        fill(c1)
+        const killed = e.get(headers[1]);
+        const wounded = e.get(headers[2]);
+        usaKilled += int(killed);
+        usaWounded += int(wounded);
+        const r_killed = sqrt(killed) / PI * scaleUp * curZoom
+        const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
         if (r_wounded == 0)
             ellipse(pos.x, pos.y, r_killed, r_killed)
           //rect(pos.x, pos.y, r_killed, r_killed)
@@ -70,7 +86,7 @@ function drawStats() {
             arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
           //rect(pos.x, pos.y, r_killed, r_killed)
       
-        fill(255,200,200)
+        fill(c2)
         arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
         //rect(pos.x, pos.y, r_wounded, r_wounded)
 
@@ -95,7 +111,9 @@ function drawStats() {
         }   
     })
 
-    const [yOffset, lngOffset] = [200.0, -65.0]
+    let gerKilled = 0;
+    let gerWounded = 0;
+    const [yOffset, lngOffset] = [500.0, -107.5]
     dataGer.getRows().forEach(e => {
         const pos = myMap.latLngToPixel(
             float(e.get(headers[3])),
@@ -104,9 +122,13 @@ function drawStats() {
 
         pos.y = pos.y + yOffset
 
-        fill(0,255,0)
-        const r_killed = sqrt(e.get(headers[1])) / PI * scaleUp * curZoom
-        const r_wounded = sqrt(e.get(headers[2])) / PI * scaleUp * curZoom
+        fill(c3)
+        const killed = e.get(headers[1]);
+        const wounded = e.get(headers[2]);
+        gerKilled += int(killed);
+        gerWounded += int(wounded);
+        const r_killed = sqrt(killed) / PI * scaleUp * curZoom
+        const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
 
         if (r_wounded == 0)
             ellipse(pos.x, pos.y, r_killed, r_killed)
@@ -115,7 +137,7 @@ function drawStats() {
             arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
           //rect(pos.x, pos.y, r_killed, r_killed)
       
-        fill(200,255,200)
+        fill(c4)
         arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
         //rect(pos.x, pos.y, r_wounded, r_wounded)
 
@@ -139,4 +161,48 @@ function drawStats() {
             labelCache.push(narLabel)
         }   
     })
+
+    const rSize = 5
+    const xOff = windowWidth - 275
+    drawRects(c1, rSize, 50,
+        xOff,
+        windowHeight / 2 - 250,
+        usaKilled, false)
+    drawRects(c2, rSize, 50,
+        xOff,
+        windowHeight / 2 - 85,
+        usaWounded, true)
+
+    drawRects(c3, rSize, 50,
+        xOff,
+        windowHeight / 2 + 200,
+        gerKilled, false)
+    drawRects(c4, rSize, 50,
+        xOff,
+        windowHeight / 2 + 210,
+        gerWounded, true)
+}
+
+function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
+    fill(color)
+    for (let i = 0; i < data / xSize; i++) {
+        for (let j = 0; j < xSize; j++) {
+            rect(j * rSize + xOff, i * rSize + yOff, rSize, rSize)
+        }
+    }
+    const calcY = inverted ? yOff + int(data / xSize + 1) * rSize : yOff - rSize
+    console.log(calcY)
+    const leftOver = data % xSize
+    for (let i = 0; i < leftOver; i++) {
+        rect(i * rSize + xOff,
+            calcY,
+            rSize, rSize)
+    }
+
+    fill(0)
+    textSize(10 * rSize)
+    textStyle(BOLD)
+    textFont("Helvetica")
+    const yCalc = inverted ? yOff + 9 * rSize : yOff + data / xSize * rSize
+    text(data, xOff, yCalc)
 }
