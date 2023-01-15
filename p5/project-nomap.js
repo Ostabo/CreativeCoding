@@ -1,8 +1,11 @@
 let data, dataGer
+let imgGer, imgUsa
 
 function preload() {
     data = loadTable('everytownresearch-massshootings.csv', 'csv', 'header');
     dataGer = loadTable('germany-massshootings.csv', 'csv', 'header');
+    imgGer = loadImage('./ger.png')
+    imgUsa = loadImage('./usa.webp')
 }
 const headers = [
     "Address",
@@ -38,7 +41,6 @@ function setup() {
 
     myMap.overlay(canvas);
     myMap.onChange(drawStats)
-  
 }
 
 function draw() {
@@ -65,6 +67,8 @@ function drawStats() {
     curZoom = myMap.zoom()
     clear()
     background(255)
+    image(imgUsa, 55, 160, 680, 380)
+    image(imgGer, 300, 575, 150, 200)
   
     let usaKilled = 0;
     let usaWounded = 0;
@@ -113,7 +117,7 @@ function drawStats() {
 
     let gerKilled = 0;
     let gerWounded = 0;
-    const [yOffset, lngOffset] = [500.0, -107.5]
+    const [yOffset, lngOffset] = [550.0, -107.5]
     dataGer.getRows().forEach(e => {
         const pos = myMap.latLngToPixel(
             float(e.get(headers[3])),
@@ -191,7 +195,6 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
         }
     }
     const calcY = inverted ? yOff + int(data / xSize + 1) * rSize : yOff - rSize
-    console.log(calcY)
     const leftOver = data % xSize
     for (let i = 0; i < leftOver; i++) {
         rect(i * rSize + xOff,
