@@ -46,12 +46,12 @@ function setup() {
 function draw() {
 }
 
-const c1 = [255,0,0]
-const c2 = [255,200,200]
-const c3 = [0,255,0]
-const c4 = [200,255,200]
-const c5 = [200,0,0]
-const c6 = [200,200,0]
+const c1 = [255, 0, 0]
+const c2 = [255, 200, 200]
+const c3 = [0, 255, 0]
+const c4 = [200, 255, 200]
+const c5 = [200, 0, 0]
+const c6 = [200, 200, 0]
 
 let first = true
 const scaleUp = 10
@@ -59,7 +59,7 @@ let labelCache = []
 function drawStats() {
     myMap.map.zoomControl.remove()
 
-    if (labelCache.length > 0) 
+    if (labelCache.length > 0)
         labelCache.forEach(l => l.remove())
 
     myMap.map.setMinZoom(4)
@@ -69,13 +69,13 @@ function drawStats() {
     background(255)
     image(imgUsa, 55, 160, 680, 380)
     image(imgGer, 300, 575, 150, 200)
-  
+
     let usaKilled = 0;
     let usaWounded = 0;
-  
+
     data.getRows().forEach(e => {
         const pos = myMap.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
-        
+
         fill(c1)
         const killed = e.get(headers[1]);
         const wounded = e.get(headers[2]);
@@ -85,11 +85,11 @@ function drawStats() {
         const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
         if (r_wounded == 0)
             ellipse(pos.x, pos.y, r_killed, r_killed)
-          //rect(pos.x, pos.y, r_killed, r_killed)
-        else 
+        //rect(pos.x, pos.y, r_killed, r_killed)
+        else
             arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-          //rect(pos.x, pos.y, r_killed, r_killed)
-      
+        //rect(pos.x, pos.y, r_killed, r_killed)
+
         fill(c2)
         arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
         //rect(pos.x, pos.y, r_wounded, r_wounded)
@@ -112,7 +112,7 @@ function drawStats() {
             narLabel.position(pos.x, pos.y)
 
             labelCache.push(narLabel)
-        }   
+        }
     })
 
     let gerKilled = 0;
@@ -136,11 +136,11 @@ function drawStats() {
 
         if (r_wounded == 0)
             ellipse(pos.x, pos.y, r_killed, r_killed)
-          //rect(pos.x, pos.y, r_killed, r_killed)
-        else 
+        //rect(pos.x, pos.y, r_killed, r_killed)
+        else
             arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-          //rect(pos.x, pos.y, r_killed, r_killed)
-      
+        //rect(pos.x, pos.y, r_killed, r_killed)
+
         fill(c4)
         arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
         //rect(pos.x, pos.y, r_wounded, r_wounded)
@@ -163,7 +163,7 @@ function drawStats() {
             narLabel.position(pos.x, pos.y)
 
             labelCache.push(narLabel)
-        }   
+        }
     })
 
     const rSize = 5

@@ -55,7 +55,7 @@ let first = true
 const scaleUp = 10
 let labelCache = []
 function drawStats() {
-    if (labelCache.length > 0) 
+    if (labelCache.length > 0)
         labelCache.forEach(l => l.remove())
 
     let labelCur = createDiv(sliderYear.value())
@@ -74,19 +74,19 @@ function drawStats() {
     data.getRows().filter(row => {
         return new Date(
             row.get(headers[6])
-            ).getFullYear() === sliderYear.value()
-        }).forEach(e => {
+        ).getFullYear() === sliderYear.value()
+    }).forEach(e => {
         const pos = myMap.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
-        
-        fill(255,0,0)
+
+        fill(255, 0, 0)
         const r_killed = sqrt(e.get(headers[1])) / PI * scaleUp * curZoom
         const r_wounded = sqrt(e.get(headers[2])) / PI * scaleUp * curZoom
         if (r_wounded == 0)
             ellipse(pos.x, pos.y, r_killed, r_killed)
-        else 
+        else
             arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-      
-        fill(255,200,200)
+
+        fill(255, 200, 200)
         arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
 
         const nar = e.get(headers[5])
@@ -107,6 +107,6 @@ function drawStats() {
             narLabel.position(pos.x, pos.y)
 
             labelCache.push(narLabel)
-        }   
+        }
     })
 }
