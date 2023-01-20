@@ -40,10 +40,8 @@ function setup() {
     myMap = mappa.tileMap(options);
 
     myMap.overlay(canvas);
-    myMap.onChange(drawStats)
-}
 
-function draw() {
+    setTimeout(drawStats, 200);
 }
 
 const c1 = [255, 0, 0]
