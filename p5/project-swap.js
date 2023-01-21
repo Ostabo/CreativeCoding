@@ -128,6 +128,7 @@ function drawStats() {
 
     if (state === 1) {
         clear()
+        background(255)
         drawHtmlHeading()
 
         const rSize = 8
@@ -143,11 +144,11 @@ function drawStats() {
             usaWounded, true)
         drawRects(c3, rSize, bCount,
             xOff,
-            windowHeight - windowHeight / 4 + rSize,
+            windowHeight - windowHeight / 4 + rSize * 3,
             gerKilled, false)
         drawRects(c4, rSize, bCount,
             xOff,
-            windowHeight - windowHeight / 4 + rSize * 2,
+            windowHeight - windowHeight / 4 + rSize * 4,
             gerWounded, true)
 
         const usaKilledPerMilHabi = round(usaKilled / usaHabitants, 2);
@@ -165,11 +166,11 @@ function drawStats() {
             usaWoundedPerMilHabi, true)
         drawRects(c3, rSize, bCount,
             xOff2,
-            windowHeight - windowHeight / 4 + rSize * 2,
+            windowHeight - windowHeight / 4 + rSize * 4,
             gerKilledPerMilHabi, false)
         drawRects(c4, rSize, bCount,
             xOff2,
-            windowHeight - windowHeight / 4 + rSize * 2,
+            windowHeight - windowHeight / 4 + rSize * 4,
             gerWoundedPerMilHabi, true)
     }
     if (state === 2) {
@@ -177,16 +178,22 @@ function drawStats() {
         drawHtmlHeading()
     }
 }
+var done = false;
+var framesLeft = 120;
 function draw() {
     if (state === 2) {
-        clear()
-        drawCircles()
+        if (!done || framesLeft-- > 0) {
+            background(255)
+            drawCircles()
+        }
         drawHtmlHeading()
     } else {
         circles = [];
         curCircle = 0;
         nextCircles = [];
         redDone = false;
+        done = false;
+        framesLeft = 120;
     }
 }
 var circles = [];
@@ -245,10 +252,7 @@ function drawCircles() {
         }
     }
 
-    // We can't make any more
-    if (count < 1) {
-        console.log("finished");
-    }
+    if (count < 1) done = true;
 }
 
 var curCircle = 1;
@@ -381,7 +385,7 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     rectMode(CENTER)
 }
 
-var state = 1;
+var state = 0;
 const stateAmount = 3;
 function drawHtmlHeading() {
     strokeWeight(0.4)
@@ -409,6 +413,8 @@ function drawHtmlHeading() {
         stroke(index === state ? c1 : cDark)
         circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter)
         stroke(cDark)
+        if (index === state)
+            circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter / 2)
     }
 }
 
