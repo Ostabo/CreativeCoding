@@ -61,15 +61,21 @@ const c6 = [200, 200, 0]
 const cDark = [20, 20, 20]
 const cLight = [250, 250, 250]
 
-const scaleUp = 10
+const scaleUp = 5
+let usaKilled = 0;
+let usaWounded = 0;
+let gerKilled = 0;
+let gerWounded = 0;
+const usaHabitants = 331.9;
+const gerHabitants = 83.2;
 function drawStats() {
     clear()
     image(staticImg, 0, 0)
     image(staticImg2, 0, windowHeight / 2)
     drawHtmlHeading()
 
-    let usaKilled = 0;
-    let usaWounded = 0;
+    usaKilled = 0;
+    usaWounded = 0;
 
     data.getRows().forEach(e => {
         const pos = myMap.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
@@ -93,8 +99,8 @@ function drawStats() {
         //rect(pos.x, pos.y, r_wounded, r_wounded)
     })
 
-    let gerKilled = 0;
-    let gerWounded = 0;
+    gerKilled = 0;
+    gerWounded = 0;
     dataGer.getRows().forEach(e => {
         const pos = myMap2.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
 
@@ -126,14 +132,14 @@ function drawStats() {
 
         const rSize = 8
         const bCount = 50
-        const xOff = windowWidth / 2 - bCount / 2 * rSize
+        const xOff = windowWidth / 4 - bCount / 2 * rSize * .25
         drawRects(c1, rSize, bCount,
             xOff,
             windowHeight / 4 - rSize * 10,
             usaKilled, false)
         drawRects(c2, rSize, bCount,
             xOff,
-            windowHeight / 4 + rSize * 23,
+            windowHeight / 4 + rSize * 22,
             usaWounded, true)
         drawRects(c3, rSize, bCount,
             xOff,
@@ -141,14 +147,34 @@ function drawStats() {
             gerKilled, false)
         drawRects(c4, rSize, bCount,
             xOff,
-            windowHeight - windowHeight / 4 + rSize * 3,
+            windowHeight - windowHeight / 4 + rSize * 2,
             gerWounded, true)
+
+        const usaKilledPerMilHabi = round(usaKilled / usaHabitants, 2);
+        const usaWoundedPerMilHabi = round(usaWounded / usaHabitants, 2);
+        const gerKilledPerMilHabi = round(gerKilled / gerHabitants, 2);
+        const gerWoundedPerMilHabi = round(gerWounded / gerHabitants, 2);
+        const xOff2 = windowWidth / 4 + bCount / 2 * rSize * 2.25
+        drawRects(c1, rSize, bCount,
+            xOff2,
+            windowHeight / 4 + rSize * 22,
+            usaKilledPerMilHabi, false)
+        drawRects(c2, rSize, bCount,
+            xOff2,
+            windowHeight / 4 + rSize * 22,
+            usaWoundedPerMilHabi, true)
+        drawRects(c3, rSize, bCount,
+            xOff2,
+            windowHeight - windowHeight / 4 + rSize * 2,
+            gerKilledPerMilHabi, false)
+        drawRects(c4, rSize, bCount,
+            xOff2,
+            windowHeight - windowHeight / 4 + rSize * 2,
+            gerWoundedPerMilHabi, true)
     }
     if (state === 2) {
         clear()
         drawHtmlHeading()
-
-        circleView = true;
     }
 }
 function draw() {
@@ -159,10 +185,12 @@ function draw() {
     } else {
         circles = [];
         curCircle = 0;
+        nextCircles = [];
+        redDone = false;
     }
 }
 var circles = [];
-var circleView = false;
+var redDone = false;
 function drawCircles() {
 
     // All the circles
@@ -183,15 +211,32 @@ function drawCircles() {
 
     // Let's try to make a certain number of new circles each frame
     // More later
-    var target = 1 + constrain(floor(frameCount / 120), 0, 20);
+    let target = 1 + constrain(floor(frameCount / 120), 0, 20);
     // How many
-    var count = 0;
+    let count = 0;
     // Try N times
-    for (var n = 0; n < 1000; n++) {
-        if (curCircle >= data.getRows().length) {
+    for (let n = 0; n < 1000; n++) {
+        if (redDone) {
+            for (let n = 0; n < 1000; n++) {
+                if (curCircle >= dataGer.getRows().length) {
+                    break;
+                }
+                if (addCircle(dataGer)) {
+                    count++;
+                }
+                // We made enough
+                if (count == target) {
+                    break;
+                }
+            }
             break;
         }
-        if (addCircle()) {
+        if (curCircle >= data.getRows().length) {
+            curCircle = 0;
+            redDone = true;
+            break;
+        }
+        if (addCircle(data)) {
             count++;
         }
         // We made enough
@@ -202,16 +247,25 @@ function drawCircles() {
 
     // We can't make any more
     if (count < 1) {
-        noLoop();
         console.log("finished");
     }
 }
 
 var curCircle = 1;
 // Add one circle
-function addCircle() {
+function addCircle(dataSet) {
     // Here's a new circle
-    var newCircle = new Circle(random(windowWidth / 2) + windowWidth / 4, random(windowHeight / 2) + windowHeight / 4, 1, data.getRows()[curCircle++].get(headers[1]));
+    const c = dataSet === data ? c1 : c3;
+    const b = dataSet === dataGer ? cDark : cDark;
+    const killed = dataSet.getRows()[curCircle].get(headers[1]);
+    const x = dataSet === data ?
+        random(windowWidth / 2) + windowWidth / 4 :
+        random(windowWidth / 16) + windowWidth / 2 - windowWidth / 32;
+    const y = dataSet === data ?
+        random(windowHeight / 2) + windowHeight / 4 :
+        random(windowHeight / 16) + windowHeight / 2 - windowHeight / 32;
+    var newCircle = new Circle(x, y, 1, killed, usaKilled, c, b);
+    curCircle++;
     // Is it in an ok spot?
     for (var i = 0; i < circles.length; i++) {
         var other = circles[i];
@@ -240,12 +294,14 @@ function addCircle() {
 }
 
 // Circle object
-function Circle(x, y, r, maxR) {
+function Circle(x, y, r, killed, total, color, border) {
     this.growing = true;
     this.x = x;
     this.y = y;
-    this.r = sqrt(r) / PI * scaleUp
-    this.maxR = maxR;
+    this.r = r;
+    this.color = color || c1;
+    this.border = border || cLight;
+    this.maxR = sqrt(killed / total * windowWidth * windowHeight / 4 / (PI + 4));
 }
 
 Circle.prototype.edges = function () {
@@ -254,44 +310,78 @@ Circle.prototype.edges = function () {
 
 // Grow
 Circle.prototype.grow = function () {
-    if (this.r < this.maxR)
+    if (this.r < this.maxR) {
         this.r += 0.5;
+        this.collides();
+    } else {
+        nextCircles[0]?.collides();
+    }
+}
+
+const maxWhile = 100;
+var nextCircles = []
+Circle.prototype.collides = function () {
+    nextCircles.splice(nextCircles.indexOf(this), 1);
+    let ret = true;
+    let c = 0;
+    while (ret && c++ <= maxWhile) {
+        circles.forEach(circle => {
+            let d = dist(circle.x, circle.y, this.x, this.y);
+            if (d < circle.r + this.r) {
+                const direction = createVector(circle.x - this.x, circle.y - this.y);
+                direction.normalize();
+                direction.mult(circle.r + this.r - d + 1);
+                circle.x += direction.x;
+                circle.y += direction.y;
+                nextCircles.push(circle);
+            } else ret = false;
+        });
+    }
 }
 
 // Show
 Circle.prototype.show = function () {
-    fill(c2);
+    fill(this.color);
     strokeWeight(1);
-    stroke(c1);
+    stroke(this.border);
     ellipse(this.x, this.y, this.r * 2);
     stroke(cDark)
 }
 
 
 function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
+    rectMode(CORNER)
     fill(color)
-    for (let i = 0; i < data / xSize; i++) {
+    for (let i = 1; i < data / xSize; i++) {
         for (let j = 0; j < xSize; j++) {
             rect(j * rSize + xOff, i * rSize + yOff, rSize, rSize)
         }
     }
-    const calcY = inverted ? yOff + int(data / xSize + 1) * rSize : yOff - rSize
+    const calcY = inverted ? yOff + int(data / xSize + 1) * rSize : yOff
     const leftOver = data % xSize
     for (let i = 0; i < leftOver; i++) {
-        rect(i * rSize + xOff,
-            calcY,
-            rSize, rSize)
+        const leftOverF = leftOver - floor(leftOver);
+        if (i >= leftOver - 1 && leftOverF > 0) {
+            rect(i * rSize + xOff,
+                calcY,
+                rSize * leftOverF, rSize)
+        } else {
+            rect(i * rSize + xOff,
+                calcY,
+                rSize, rSize)
+        }
     }
 
     fill(0)
     textSize(10 * rSize)
     textStyle(BOLD)
     textFont("Helvetica")
-    const yCalc = inverted ? yOff + 9 * rSize : yOff + data / xSize * rSize - rSize
+    const yCalc = inverted ? yOff + 9 * rSize : yOff + data / xSize * rSize
     text(data, xOff, yCalc)
+    rectMode(CENTER)
 }
 
-var state = 2;
+var state = 1;
 const stateAmount = 3;
 function drawHtmlHeading() {
     strokeWeight(0.4)
