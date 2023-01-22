@@ -70,6 +70,8 @@ const cLight = [250, 250, 250]
 const scaleUp = 6
 let usaKilled = 0;
 let usaWounded = 0;
+let usaPreventable = 0;
+let usaWarning = 0;
 let gerKilled = 0;
 let gerWounded = 0;
 const usaHabitants = 331.9;
@@ -90,6 +92,10 @@ function drawStats() {
         const wounded = e.get(headers[2]);
         const preventableGun = e.get(headers[7]) === "Yes";
         const warning = e.get(headers[9]) === "Yes";
+        if (preventableGun)
+            usaPreventable++;
+        if (warning)
+            usaWarning++;
         fill(warning ? c6 : c1)
         usaKilled += int(killed);
         usaWounded += int(wounded);
@@ -192,6 +198,102 @@ function drawStats() {
     }
     if (state === 2) {
         clear()
+        drawHtmlHeading()
+    }
+    if (state === 3) {
+        clear()
+        background(cLight)
+
+        let countsPerYear = [
+            { year: 2009, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2010, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2011, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2012, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2013, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2014, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2015, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2016, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2017, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2018, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2019, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2020, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2021, killed: 0, wounded: 0, preventable: 0, warning: 0 },
+            { year: 2022, killed: 0, wounded: 0, preventable: 0, warning: 0 }
+        ]
+        const d = data.getRows();
+        d.forEach(row => {
+            const year = new Date(row.get(headers[6])).getFullYear()
+            const killed = row.get(headers[1])
+            const wounded = row.get(headers[2])
+            const preventable = row.get(headers[7]) === "Yes" ? 1 : 0
+            const warning = row.get(headers[8]) === "Yes" ? 1 : 0
+            const cur = countsPerYear.find(x => x.year === year);
+            cur.killed += int(killed)
+            cur.wounded += int(wounded)
+            cur.preventable += int(preventable)
+            cur.warning += int(warning)
+        })
+
+        countsPerYear.forEach((year, i) => {
+            const total = year.killed + year.wounded + year.preventable + year.warning
+
+            const w = 30 * i + windowWidth / 4
+            const killed = map(year.killed, 0, total, 0, TWO_PI) / 2
+            const wounded = map(year.wounded, 0, total, 0, TWO_PI) / 2
+            const prevented = map(year.preventable, 0, total, 0, TWO_PI) / 2
+            const warning = map(year.warning, 0, total, 0, TWO_PI) / 2
+            const [x, y] = [windowWidth / 2, windowHeight / 2]
+            const gap = 0.01 * TWO_PI
+
+            noFill()
+            strokeWeight(5)
+
+            stroke(c1)
+            arc(x, y, w, w, warning + prevented + wounded + gap, warning + prevented + wounded + killed)
+            stroke(c2)
+            let minA = min(warning + prevented + gap, warning + prevented + wounded)
+            let maxA = max(warning + prevented + gap, warning + prevented + wounded)
+            if (wounded > 0) arc(x, y, w, w, minA, maxA)
+            stroke(c8)
+            minA = min(warning + gap, warning + prevented)
+            maxA = max(warning + gap, warning + prevented)
+            if (prevented > 0) arc(x, y, w, w, minA, maxA)
+            stroke(c6)
+            minA = min(0, warning)
+            maxA = max(0, warning)
+            if (warning > 0) arc(x, y, w, w, minA, maxA)
+            stroke(cDark)
+
+            const w2 = 30 * i + windowWidth / 4
+            const killed2 = map(year.killed, 0, usaKilled, 0, TWO_PI) / 2
+            const wounded2 = map(year.wounded, 0, usaWounded, 0, TWO_PI) / 2
+            const prevented2 = map(year.preventable, 0, usaPreventable, 0, TWO_PI) / 2
+            const warning2 = map(year.warning, 0, usaWarning, 0, TWO_PI) / 2
+            const [x2, y2] = [windowWidth / 2, windowHeight / 2]
+            const gap2 = 0.01 * TWO_PI
+
+            noFill()
+            strokeWeight(5)
+            stroke(c1)
+            arc(x2, y2, w2, w2, PI, killed2 - PI)
+            stroke(c2)
+            let minA2 = min(killed2 + gap2, killed2 + wounded2) - PI
+            let maxA2 = max(killed2, killed2 + wounded2) - PI
+            arc(x2, y2, w2, w2, minA2, maxA2)
+            stroke(c8)
+            minA2 = min(killed2 + wounded2 + gap2, killed2 + wounded2 + prevented2) - PI
+            maxA2 = max(killed2 + wounded2, killed2 + wounded2 + prevented2) - PI
+            arc(x2, y2, w2, w2, minA2, maxA2)
+            stroke(c6)
+            minA2 = min(killed2 + wounded2 + prevented2 + gap2, killed2 + wounded2 + prevented2 + warning2) - PI
+            maxA2 = max(killed2 + wounded2 + prevented2, killed2 + wounded2 + prevented2 + warning2) - PI
+            arc(x2, y2, w2, w2, minA2, maxA2)
+            stroke(cDark)
+
+            strokeWeight(1)
+            line(x - w / 1.8, y, x, y)
+        })
+
         drawHtmlHeading()
     }
 }
@@ -407,7 +509,7 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
 }
 
 var state = 0;
-const stateAmount = 3;
+const stateAmount = 4;
 function drawHtmlHeading() {
     strokeWeight(0.4)
 
