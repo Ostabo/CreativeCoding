@@ -15,7 +15,7 @@ function preload() {
         zoom: curZoom,
         width: int(width),
         height: int(height),
-        style: 'light-v9'
+        style: 'light-v10'
         // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
@@ -26,11 +26,11 @@ function preload() {
 
     const options2 = {
         lat: 50,
-        lng: 10,
-        zoom: curZoom,
+        lng: 12,
+        zoom: curZoom + 1,
         width: int(width),
         height: int(height),
-        style: 'light-v9'
+        style: 'light-v10'
         // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
@@ -44,11 +44,15 @@ const headers = [
     "Latitude",
     "Longitude",
     "Narrative",
-    "Date"
+    "Date",
+    "Assault weapon OR high-capacity magazine",
+    "Killed intimate partner or family",
+    "Dangerous warning signs"
 ]
 let canvas;
 function setup() {
     canvas = createCanvas(windowWidth, windowHeight);
+    frameRate(20)
     drawStats()
 }
 
@@ -57,11 +61,13 @@ const c2 = [255, 200, 200]
 const c3 = [0, 255, 0]
 const c4 = [200, 255, 200]
 const c5 = [200, 0, 0]
-const c6 = [200, 200, 0]
+const c6 = [240, 240, 0]
+const c7 = [150, 250, 0]
+const c8 = [0, 0, 200]
 const cDark = [20, 20, 20]
 const cLight = [250, 250, 250]
 
-const scaleUp = 5
+const scaleUp = 6
 let usaKilled = 0;
 let usaWounded = 0;
 let gerKilled = 0;
@@ -80,18 +86,21 @@ function drawStats() {
     data.getRows().forEach(e => {
         const pos = myMap.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
 
-        fill(c1)
         const killed = e.get(headers[1]);
         const wounded = e.get(headers[2]);
+        const preventableGun = e.get(headers[7]) === "Yes";
+        const warning = e.get(headers[9]) === "Yes";
+        fill(warning ? c6 : c1)
         usaKilled += int(killed);
         usaWounded += int(wounded);
         const r_killed = sqrt(killed) / PI * scaleUp * curZoom
         const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
+
         if (r_wounded == 0)
-            ellipse(pos.x, pos.y, r_killed, r_killed)
+            preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
         //rect(pos.x, pos.y, r_killed, r_killed)
         else
-            arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+            preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
         //rect(pos.x, pos.y, r_killed, r_killed)
 
         fill(c2)
@@ -131,9 +140,9 @@ function drawStats() {
         background(255)
         drawHtmlHeading()
 
-        const rSize = 8
+        const rSize = windowWidth / 130
         const bCount = 50
-        const xOff = windowWidth / 4 - bCount / 2 * rSize * .25
+        const xOff = windowWidth / 4 - bCount / 2 * rSize * .59
         drawRects(c1, rSize, bCount,
             xOff,
             windowHeight / 4 - rSize * 10,
@@ -150,28 +159,36 @@ function drawStats() {
             xOff,
             windowHeight - windowHeight / 4 + rSize * 4,
             gerWounded, true)
+        textSize(windowHeight / 20)
+        textAlign(CENTER)
+        text("TOTAL", xOff + bCount / 2 * rSize, windowHeight / 4 - rSize * 15)
+        textAlign(LEFT)
 
-        const usaKilledPerMilHabi = round(usaKilled / usaHabitants, 2);
-        const usaWoundedPerMilHabi = round(usaWounded / usaHabitants, 2);
-        const gerKilledPerMilHabi = round(gerKilled / gerHabitants, 2);
-        const gerWoundedPerMilHabi = round(gerWounded / gerHabitants, 2);
-        const xOff2 = windowWidth / 4 + bCount / 2 * rSize * 2.25
+        const usaKilledPerTHabi = round(usaKilled / usaHabitants * 10, 2);
+        const usaWoundedPerTHabi = round(usaWounded / usaHabitants * 10, 2);
+        const gerKilledPerTHabi = round(gerKilled / gerHabitants * 10, 2);
+        const gerWoundedPerTHabi = round(gerWounded / gerHabitants * 10, 2);
+        const xOff2 = windowWidth / 4 + bCount / 2 * rSize * 1.51
         drawRects(c1, rSize, bCount,
             xOff2,
             windowHeight / 4 + rSize * 22,
-            usaKilledPerMilHabi, false)
+            usaKilledPerTHabi, false)
         drawRects(c2, rSize, bCount,
             xOff2,
             windowHeight / 4 + rSize * 22,
-            usaWoundedPerMilHabi, true)
+            usaWoundedPerTHabi, true)
         drawRects(c3, rSize, bCount,
             xOff2,
             windowHeight - windowHeight / 4 + rSize * 4,
-            gerKilledPerMilHabi, false)
+            gerKilledPerTHabi, false)
         drawRects(c4, rSize, bCount,
             xOff2,
             windowHeight - windowHeight / 4 + rSize * 4,
-            gerWoundedPerMilHabi, true)
+            gerWoundedPerTHabi, true)
+        textSize(windowHeight / 20)
+        textAlign(CENTER)
+        text("PER 100K\nHABITANTS", xOff2 + bCount / 2 * rSize, windowHeight / 4 - rSize * 15)
+        textAlign(LEFT)
     }
     if (state === 2) {
         clear()
@@ -179,21 +196,21 @@ function drawStats() {
     }
 }
 var done = false;
-var framesLeft = 120;
+var framesLeft = 60;
 function draw() {
     if (state === 2) {
         if (!done || framesLeft-- > 0) {
             background(255)
             drawCircles()
+            drawHtmlHeading()
         }
-        drawHtmlHeading()
     } else {
         circles = [];
         curCircle = 0;
         nextCircles = [];
         redDone = false;
         done = false;
-        framesLeft = 120;
+        framesLeft = 60;
     }
 }
 var circles = [];
@@ -259,16 +276,19 @@ var curCircle = 1;
 // Add one circle
 function addCircle(dataSet) {
     // Here's a new circle
-    const c = dataSet === data ? c1 : c3;
-    const b = dataSet === dataGer ? cDark : cDark;
-    const killed = dataSet.getRows()[curCircle].get(headers[1]);
+    const cur_data = dataSet.getRows()[curCircle];
+    const preventable = cur_data.get(headers[9]) === "Yes";
+    const preventableGun = cur_data.get(headers[7]) === "Yes";
+    const c = dataSet === data ? preventable ? c6 : c1 : c3;
+    const b = dataSet === data ? preventableGun ? c8 : cDark : cDark;
+    const killed = cur_data.get(headers[1]);
     const x = dataSet === data ?
         random(windowWidth / 2) + windowWidth / 4 :
         random(windowWidth / 16) + windowWidth / 2 - windowWidth / 32;
     const y = dataSet === data ?
         random(windowHeight / 2) + windowHeight / 4 :
         random(windowHeight / 16) + windowHeight / 2 - windowHeight / 32;
-    var newCircle = new Circle(x, y, 1, killed, usaKilled, c, b);
+    var newCircle = new Circle(x, y, 1, killed, usaKilled, c, b, preventableGun ? 2 : .4);
     curCircle++;
     // Is it in an ok spot?
     for (var i = 0; i < circles.length; i++) {
@@ -298,13 +318,14 @@ function addCircle(dataSet) {
 }
 
 // Circle object
-function Circle(x, y, r, killed, total, color, border) {
+function Circle(x, y, r, killed, total, color, border, stroke) {
     this.growing = true;
     this.x = x;
     this.y = y;
     this.r = r;
     this.color = color || c1;
     this.border = border || cLight;
+    this.stroke = stroke;
     this.maxR = sqrt(killed / total * windowWidth * windowHeight / 4 / (PI + 4));
 }
 
@@ -315,7 +336,7 @@ Circle.prototype.edges = function () {
 // Grow
 Circle.prototype.grow = function () {
     if (this.r < this.maxR) {
-        this.r += 0.5;
+        this.r += 1;
         this.collides();
     } else {
         nextCircles[0]?.collides();
@@ -346,7 +367,7 @@ Circle.prototype.collides = function () {
 // Show
 Circle.prototype.show = function () {
     fill(this.color);
-    strokeWeight(1);
+    strokeWeight(this.stroke || .4);
     stroke(this.border);
     ellipse(this.x, this.y, this.r * 2);
     stroke(cDark)
@@ -377,10 +398,10 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     }
 
     fill(0)
-    textSize(10 * rSize)
+    textSize(8 * rSize)
     textStyle(BOLD)
     textFont("Helvetica")
-    const yCalc = inverted ? yOff + 9 * rSize : yOff + data / xSize * rSize
+    const yCalc = inverted ? yOff + 7 * rSize : yOff + data / xSize * rSize
     text(data, xOff, yCalc)
     rectMode(CENTER)
 }
@@ -390,17 +411,21 @@ const stateAmount = 3;
 function drawHtmlHeading() {
     strokeWeight(0.4)
 
-    const heading = createDiv("Mass Shootings 2009 - 2022")
-    heading.style("color", "white")
-    heading.style("background-color", "#cccccc")
-    heading.style("width", "100%")
-    heading.style("font-size", "50px")
-    heading.style("text-align", "center")
-    heading.style("padding", "5px")
-    heading.style("border-radius", "5px")
-    heading.style("transform", "translate(-50%, 00%)")
-    heading.style("user-select", "none")
-    heading.position(windowWidth / 2, 0)
+    if (!document.getElementById("heading")) {
+        const heading = createDiv("MASS SHOOTINGS 2009 - 2022")
+        heading.id("heading")
+        //heading.style("color", "white")
+        heading.style("background-color", "#cccccc")
+        heading.style("width", "100%")
+        heading.style("font-size", int(windowHeight / 30) + "px")
+        heading.style("text-align", "center")
+        heading.style("padding", "5px")
+        heading.style("font-family", "Helvetica")
+        heading.style("font-weight", "bold")
+        heading.style("transform", "translate(-50%, 0%)")
+        heading.style("user-select", "none")
+        heading.position(windowWidth / 2, 0)
+    }
 
     const stateDiameter = 20;
     ellipseMode(CENTER)
@@ -413,8 +438,11 @@ function drawHtmlHeading() {
         stroke(index === state ? c1 : cDark)
         circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter)
         stroke(cDark)
+        push()
+        noFill()
         if (index === state)
-            circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter / 2)
+            circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter * 1.2)
+        pop()
     }
 }
 

@@ -10,8 +10,22 @@ const headers = [
     "Latitude",
     "Longitude",
     "Narrative",
-    "Date"
+    "Date",
+    "Assault weapon OR high-capacity magazine",
+    "Killed intimate partner or family",
+    "Dangerous warning signs"
 ]
+
+const c1 = [255, 0, 0]
+const c2 = [255, 200, 200]
+const c3 = [0, 255, 0]
+const c4 = [200, 255, 200]
+const c5 = [200, 0, 0]
+const c6 = [240, 240, 0]
+const c7 = [0, 200, 200]
+const c8 = [0, 0, 200]
+const cDark = [20, 20, 20]
+const cLight = [250, 250, 250]
 
 let myMap;
 let canvas;
@@ -47,6 +61,7 @@ function setup() {
 
     myMap.overlay(canvas);
     myMap.onChange(drawStats)
+    strokeWeight(0.4)
 }
 
 function draw() {
@@ -54,6 +69,8 @@ function draw() {
 let first = true
 const scaleUp = 10
 let labelCache = []
+let usaKilled = 0
+let usaWounded = 0
 function drawStats() {
     if (labelCache.length > 0)
         labelCache.forEach(l => l.remove())
@@ -67,7 +84,7 @@ function drawStats() {
 
     //myMap.map.setMaxBounds(maxBounds)
     //myMap.map.fitBounds(maxBounds)
-    myMap.map.setMinZoom(4)
+    myMap.map.setMinZoom(3)
     myMap.map.setMaxZoom(10)
     curZoom = myMap.zoom()
     clear()
@@ -76,19 +93,29 @@ function drawStats() {
             row.get(headers[6])
         ).getFullYear() === sliderYear.value()
     }).forEach(e => {
+
         const pos = myMap.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
 
-        fill(255, 0, 0)
-        const r_killed = sqrt(e.get(headers[1])) / PI * scaleUp * curZoom
-        const r_wounded = sqrt(e.get(headers[2])) / PI * scaleUp * curZoom
+        const killed = e.get(headers[1]);
+        const wounded = e.get(headers[2]);
+        const preventableGun = e.get(headers[7]) === "Yes";
+        const warning = e.get(headers[9]) === "Yes";
+        fill(warning ? c6 : c1)
+        usaKilled += int(killed);
+        usaWounded += int(wounded);
+        const r_killed = sqrt(killed) / PI * scaleUp * curZoom
+        const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
+
         if (r_wounded == 0)
-            ellipse(pos.x, pos.y, r_killed, r_killed)
+            preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
+        //rect(pos.x, pos.y, r_killed, r_killed)
         else
-            arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+            preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+        //rect(pos.x, pos.y, r_killed, r_killed)
 
-        fill(255, 200, 200)
+        fill(c2)
         arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
-
+        //rect(pos.x, pos.y, r_wounded, r_wounded)
         const nar = e.get(headers[5])
         if (curZoom > 5) {
             let narLabel = createDiv(nar)
