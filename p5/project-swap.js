@@ -77,6 +77,7 @@ let gerWounded = 0;
 const usaHabitants = 331.9;
 const gerHabitants = 83.2;
 function drawStats() {
+    usaKilled = 0, usaWounded = 0, usaPreventable = 0, usaWarning = 0;
     clear()
     image(staticImg, 0, 0)
     image(staticImg2, 0, windowHeight / 2)
@@ -93,9 +94,9 @@ function drawStats() {
         const preventableGun = e.get(headers[7]) === "Yes";
         const warning = e.get(headers[9]) === "Yes";
         if (preventableGun)
-            usaPreventable++;
+            usaPreventable += int(killed) + int(wounded);
         if (warning)
-            usaWarning++;
+            usaWarning += int(killed) + int(wounded);
         fill(warning ? c6 : c1)
         usaKilled += int(killed);
         usaWounded += int(wounded);
@@ -146,9 +147,9 @@ function drawStats() {
         background(255)
         drawHtmlHeading()
 
-        const rSize = windowWidth / 130
+        const rSize = windowWidth / 150
         const bCount = 50
-        const xOff = windowWidth / 4 - bCount / 2 * rSize * .59
+        const xOff = windowWidth / 4 - bCount / 2 * rSize * .75
         drawRects(c1, rSize, bCount,
             xOff,
             windowHeight / 4 - rSize * 10,
@@ -165,8 +166,8 @@ function drawStats() {
             xOff,
             windowHeight - windowHeight / 4 + rSize * 4,
             gerWounded, true)
-        textSize(windowHeight / 20)
         textAlign(CENTER)
+        textSize(windowWidth / 25)
         text("TOTAL", xOff + bCount / 2 * rSize, windowHeight / 4 - rSize * 15)
         textAlign(LEFT)
 
@@ -174,7 +175,7 @@ function drawStats() {
         const usaWoundedPerTHabi = round(usaWounded / usaHabitants * 10, 2);
         const gerKilledPerTHabi = round(gerKilled / gerHabitants * 10, 2);
         const gerWoundedPerTHabi = round(gerWounded / gerHabitants * 10, 2);
-        const xOff2 = windowWidth / 4 + bCount / 2 * rSize * 1.51
+        const xOff2 = windowWidth / 4 + bCount / 2 * rSize * 1.75
         drawRects(c1, rSize, bCount,
             xOff2,
             windowHeight / 4 + rSize * 22,
@@ -191,8 +192,8 @@ function drawStats() {
             xOff2,
             windowHeight - windowHeight / 4 + rSize * 4,
             gerWoundedPerTHabi, true)
-        textSize(windowHeight / 20)
         textAlign(CENTER)
+        textSize(windowWidth / 25)
         text("PER 100K\nHABITANTS", xOff2 + bCount / 2 * rSize, windowHeight / 4 - rSize * 15)
         textAlign(LEFT)
     }
@@ -225,8 +226,8 @@ function drawStats() {
             const year = new Date(row.get(headers[6])).getFullYear()
             const killed = row.get(headers[1])
             const wounded = row.get(headers[2])
-            const preventable = row.get(headers[7]) === "Yes" ? 1 : 0
-            const warning = row.get(headers[8]) === "Yes" ? 1 : 0
+            const preventable = row.get(headers[7]) === "Yes" ? int(killed) + int(wounded) : 0
+            const warning = row.get(headers[9]) === "Yes" ? int(killed) + int(wounded) : 0
             const cur = countsPerYear.find(x => x.year === year);
             cur.killed += int(killed)
             cur.wounded += int(wounded)
@@ -235,13 +236,13 @@ function drawStats() {
         })
 
         countsPerYear.forEach((year, i) => {
-            const total = year.killed + year.wounded + year.preventable + year.warning
 
+            const total = year.killed + year.wounded + year.preventable + year.warning
             const w = 30 * i + windowWidth / 4
-            const killed = map(year.killed, 0, total, 0, TWO_PI) / 2
-            const wounded = map(year.wounded, 0, total, 0, TWO_PI) / 2
-            const prevented = map(year.preventable, 0, total, 0, TWO_PI) / 2
-            const warning = map(year.warning, 0, total, 0, TWO_PI) / 2
+            const killed = map(year.killed * circleAnimation, 0, total, 0, TWO_PI) / 2
+            const wounded = map(year.wounded * circleAnimation, 0, total, 0, TWO_PI) / 2
+            const prevented = map(year.preventable * circleAnimation, 0, total, 0, TWO_PI) / 2
+            const warning = map(year.warning * circleAnimation, 0, total, 0, TWO_PI) / 2
             const [x, y] = [windowWidth / 2, windowHeight / 2]
             const gap = 0.01 * TWO_PI
 
@@ -265,10 +266,11 @@ function drawStats() {
             stroke(cDark)
 
             const w2 = 30 * i + windowWidth / 4
-            const killed2 = map(year.killed, 0, usaKilled, 0, TWO_PI) / 2
-            const wounded2 = map(year.wounded, 0, usaWounded, 0, TWO_PI) / 2
-            const prevented2 = map(year.preventable, 0, usaPreventable, 0, TWO_PI) / 2
-            const warning2 = map(year.warning, 0, usaWarning, 0, TWO_PI) / 2
+            //const total2 = usaKilled + usaWounded
+            const killed2 = map(year.killed * circleAnimation, 0, usaKilled, 0, TWO_PI) / 2
+            const wounded2 = map(year.wounded * circleAnimation, 0, usaWounded, 0, TWO_PI) / 2
+            const prevented2 = map(year.preventable * circleAnimation, 0, usaPreventable, 0, TWO_PI) / 2
+            const warning2 = map(year.warning * circleAnimation, 0, usaWarning, 0, TWO_PI) / 2
             const [x2, y2] = [windowWidth / 2, windowHeight / 2]
             const gap2 = 0.01 * TWO_PI
 
@@ -290,15 +292,17 @@ function drawStats() {
             arc(x2, y2, w2, w2, minA2, maxA2)
             stroke(cDark)
 
-            strokeWeight(1)
-            line(x - w / 1.8, y, x, y)
         })
+        strokeWeight(1)
+        line(windowWidth / 2, windowHeight / 2, windowWidth / 10, windowHeight / 2)
 
         drawHtmlHeading()
     }
 }
 var done = false;
 var framesLeft = 60;
+let circleAnimation = 0.2;
+let circleAnimationDone = false;
 function draw() {
     if (state === 2) {
         if (!done || framesLeft-- > 0) {
@@ -313,6 +317,24 @@ function draw() {
         redDone = false;
         done = false;
         framesLeft = 60;
+    }
+
+    if (state === 3) {
+        if (!circleAnimationDone) {
+            circleAnimation += 0.05;
+            drawStats()
+            if (circleAnimation >= 1) circleAnimationDone = true;
+        } /* else if (circleAnimation > 1) {
+            circleAnimation -= 0.05;
+            drawStats()
+            if (circleAnimation <= 1.01) {
+                circleAnimation = 1;
+                drawStats()
+            }
+        } */
+    } else {
+        circleAnimation = 0.2;
+        circleAnimationDone = false;
     }
 }
 var circles = [];
@@ -499,13 +521,14 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
         }
     }
 
-    fill(0)
-    textSize(8 * rSize)
+    fill(0, 0, 0, 150)
+    textSize(7 * rSize)
     textStyle(BOLD)
     textFont("Helvetica")
-    const yCalc = inverted ? yOff + 7 * rSize : yOff + data / xSize * rSize
+    const yCalc = inverted ? yOff + 7 * rSize : yOff + data / xSize * rSize - rSize / 2
     text(data, xOff, yCalc)
     rectMode(CENTER)
+    fill(cDark)
 }
 
 var state = 0;
@@ -538,13 +561,10 @@ function drawHtmlHeading() {
     rect(offsetState, windowHeight / 2, stateDiameter * 2, stateAmount * (stateDiameter + statePadding) + statePadding, 20);
     for (let index = 0; index < stateAmount; index++) {
         stroke(index === state ? c1 : cDark)
-        circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter)
-        stroke(cDark)
-        push()
-        noFill()
         if (index === state)
-            circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter * 1.2)
-        pop()
+            circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter * 1.4)
+        stroke(cDark)
+        circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter)
     }
 }
 
