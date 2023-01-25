@@ -15,7 +15,7 @@ function preload() {
         zoom: curZoom,
         width: int(width),
         height: int(height),
-        style: 'light-v10'
+        style: 'dark-v10'
         // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
@@ -30,7 +30,7 @@ function preload() {
         zoom: curZoom + 1,
         width: int(width),
         height: int(height),
-        style: 'light-v10'
+        style: 'dark-v10'
         // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
@@ -144,7 +144,7 @@ function drawStats() {
 
     if (state === 1) {
         clear()
-        background(255)
+        background(cLight)
         drawHtmlHeading()
 
         const rSize = windowWidth / 150
@@ -166,9 +166,9 @@ function drawStats() {
             xOff,
             windowHeight - windowHeight / 4 + rSize * 4,
             gerWounded, true)
-        textAlign(CENTER)
-        textSize(windowWidth / 25)
-        text("TOTAL", xOff + bCount / 2 * rSize, windowHeight / 4 - rSize * 15)
+        textAlign(LEFT)
+        textSize(fontSize1)
+        text("TOTAL", xOff, windowHeight / 4 - rSize * 15)
         textAlign(LEFT)
 
         const usaKilledPerTHabi = round(usaKilled / usaHabitants * 10, 2);
@@ -192,10 +192,9 @@ function drawStats() {
             xOff2,
             windowHeight - windowHeight / 4 + rSize * 4,
             gerWoundedPerTHabi, true)
-        textAlign(CENTER)
-        textSize(windowWidth / 25)
-        text("PER 100K\nHABITANTS", xOff2 + bCount / 2 * rSize, windowHeight / 4 - rSize * 15)
         textAlign(LEFT)
+        textSize(fontSize1)
+        text("PER 100K HABITANTS", xOff2, windowHeight / 4 - rSize * 15)
     }
     if (state === 2) {
         clear()
@@ -243,7 +242,7 @@ function drawStats() {
             const wounded = map(year.wounded * circleAnimation, 0, total, 0, TWO_PI) / 2
             const prevented = map(year.preventable * circleAnimation, 0, total, 0, TWO_PI) / 2
             const warning = map(year.warning * circleAnimation, 0, total, 0, TWO_PI) / 2
-            const [x, y] = [windowWidth / 2, windowHeight / 2]
+            const [x, y] = [windowWidth / 2, windowHeight / 2 + windowHeight / 10]
             const gap = 0.01 * TWO_PI
 
             noFill()
@@ -266,12 +265,12 @@ function drawStats() {
             stroke(cDark)
 
             const w2 = 30 * i + windowWidth / 4
-            //const total2 = usaKilled + usaWounded
-            const killed2 = map(year.killed * circleAnimation, 0, usaKilled, 0, TWO_PI) / 2
-            const wounded2 = map(year.wounded * circleAnimation, 0, usaWounded, 0, TWO_PI) / 2
-            const prevented2 = map(year.preventable * circleAnimation, 0, usaPreventable, 0, TWO_PI) / 2
-            const warning2 = map(year.warning * circleAnimation, 0, usaWarning, 0, TWO_PI) / 2
-            const [x2, y2] = [windowWidth / 2, windowHeight / 2]
+            const total2 = usaKilled + usaWounded
+            const killed2 = map(year.killed * circleAnimation, 0, total2, 0, TWO_PI) / 2
+            const wounded2 = map(year.wounded * circleAnimation, 0, total2, 0, TWO_PI) / 2
+            const prevented2 = map(year.preventable * circleAnimation, 0, total2, 0, TWO_PI) / 2
+            const warning2 = map(year.warning * circleAnimation, 0, total2, 0, TWO_PI) / 2
+            const [x2, y2] = [windowWidth / 2, windowHeight / 2 - windowHeight / 10]
             const gap2 = 0.01 * TWO_PI
 
             noFill()
@@ -306,7 +305,7 @@ let circleAnimationDone = false;
 function draw() {
     if (state === 2) {
         if (!done || framesLeft-- > 0) {
-            background(255)
+            background(cLight)
             drawCircles()
             drawHtmlHeading()
         }
@@ -501,6 +500,7 @@ Circle.prototype.show = function () {
 function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     rectMode(CORNER)
     fill(color)
+    stroke(cLight)
     for (let i = 1; i < data / xSize; i++) {
         for (let j = 0; j < xSize; j++) {
             rect(j * rSize + xOff, i * rSize + yOff, rSize, rSize)
@@ -522,17 +522,20 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     }
 
     fill(0, 0, 0, 150)
-    textSize(7 * rSize)
+    textSize(fontSize2)
     textStyle(BOLD)
+    textAlign(RIGHT)
     textFont("Helvetica")
-    const yCalc = inverted ? yOff + 7 * rSize : yOff + data / xSize * rSize - rSize / 2
-    text(data, xOff, yCalc)
+    const yCalc = inverted ? yOff + 4 * rSize : yOff + data / xSize * rSize - rSize / 2
+    text(data, xOff - rSize, yCalc)
     rectMode(CENTER)
     fill(cDark)
 }
 
 var state = 0;
 const stateAmount = 4;
+var fontSize1 = windowWidth / 35
+var fontSize2 = windowWidth / 40
 function drawHtmlHeading() {
     strokeWeight(0.4)
 
@@ -540,16 +543,18 @@ function drawHtmlHeading() {
         const heading = createDiv("MASS SHOOTINGS 2009 - 2022")
         heading.id("heading")
         //heading.style("color", "white")
-        heading.style("background-color", "#cccccc")
-        heading.style("width", "100%")
-        heading.style("font-size", int(windowHeight / 30) + "px")
-        heading.style("text-align", "center")
-        heading.style("padding", "5px")
+        heading.style("background-color", "rgb(" + cLight + ")")
+        heading.style("width", "fit-content")
+        heading.style("font-size", int(fontSize1) + "px")
+        heading.style("text-align", "left")
+        heading.style("padding", "10px 20px")
+        heading.style("margin", "20px")
         heading.style("font-family", "Helvetica")
         heading.style("font-weight", "bold")
-        heading.style("transform", "translate(-50%, 0%)")
+        heading.style("border-radius", "4rem")
+        heading.style("left", "0")
         heading.style("user-select", "none")
-        heading.position(windowWidth / 2, 0)
+        heading.position(windowWidth / 12, 0)
     }
 
     const stateDiameter = 20;
