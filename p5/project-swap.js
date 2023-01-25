@@ -3,11 +3,14 @@ let staticImg, staticImg2;
 
 let curZoom = 3;
 let myMap, myMap2;
+let font1, font2;
 function preload() {
     data = loadTable('everytownresearch-massshootings.csv', 'csv', 'header');
     dataGer = loadTable('germany-massshootings.csv', 'csv', 'header');
+    font1 = loadFont('IBMPlexSans-Italic.otf');
+    font2 = loadFont('IBMPlexSans-TextItalic.otf');
 
-    const [width, height] = [window.innerWidth, window.innerHeight / 2]
+    const [width, height] = [window.innerWidth, window.innerHeight]
 
     const options = {
         lat: 40,
@@ -15,8 +18,8 @@ function preload() {
         zoom: curZoom,
         width: int(width),
         height: int(height),
-        style: 'dark-v10'
-        // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
+        style: 'dark-v9',
+        //style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
     const key = 'pk.eyJ1Ijoic2FyYWFzZGF1Z2JqZXJnIiwiYSI6ImNqbWhua2owMjJleTkzdnE0bDlzZHl6YmcifQ.QD5xpdK9hOwzH427mF5_4Q'
@@ -30,7 +33,7 @@ function preload() {
         zoom: curZoom + 1,
         width: int(width),
         height: int(height),
-        style: 'dark-v10'
+        style: 'dark-v9'
         // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
@@ -52,20 +55,34 @@ const headers = [
 let canvas;
 function setup() {
     canvas = createCanvas(windowWidth, windowHeight);
+    textFont(font1)
     frameRate(20)
     drawStats()
 }
 
-const c1 = [255, 0, 0]
-const c2 = [255, 200, 200]
-const c3 = [0, 255, 0]
-const c4 = [200, 255, 200]
+const c1 = [255, 4, 4]
+const c2 = [255, 201, 201]
+const c3 = c1
+const c4 = c2
 const c5 = [200, 0, 0]
-const c6 = [240, 240, 0]
+const c6 = [255, 255, 26]
 const c7 = [150, 250, 0]
-const c8 = [0, 0, 200]
+const c8 = [176, 224, 255]
 const cDark = [20, 20, 20]
 const cLight = [250, 250, 250]
+
+function drawDistribution(count, pos, radius, size) {
+    for (let i = 1; i < count; i++) {
+        const f = i / count / 3;
+        const angle = i * (1 + Math.sqrt(2));
+        const dist = f * radius;
+
+        const x = pos.x + cos(angle * TWO_PI) * dist;
+        const y = pos.y + sin(angle * TWO_PI) * dist;
+
+        circle(x, y, size);
+    }
+}
 
 const scaleUp = 6
 let usaKilled = 0;
@@ -80,7 +97,11 @@ function drawStats() {
     usaKilled = 0, usaWounded = 0, usaPreventable = 0, usaWarning = 0;
     clear()
     image(staticImg, 0, 0)
-    image(staticImg2, 0, windowHeight / 2)
+
+    if (state === 1) {
+        clear()
+        image(staticImg2, 0, 0)
+    }
     drawHtmlHeading()
 
     usaKilled = 0;
@@ -97,22 +118,29 @@ function drawStats() {
             usaPreventable += int(killed) + int(wounded);
         if (warning)
             usaWarning += int(killed) + int(wounded);
-        fill(warning ? c6 : c1)
         usaKilled += int(killed);
         usaWounded += int(wounded);
         const r_killed = sqrt(killed) / PI * scaleUp * curZoom
         const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
+        fill(c1)
 
-        if (r_wounded == 0)
-            preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
-        //rect(pos.x, pos.y, r_killed, r_killed)
-        else
-            preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-        //rect(pos.x, pos.y, r_killed, r_killed)
+        if (state === 0) {
+            if (r_wounded == 0) {
+                drawDistribution(killed, pos, r_killed, 4)
+            }
+            //ellipse(pos.x, pos.y, r_killed, r_killed)
+            //rect(pos.x, pos.y, r_killed, r_killed)
+            else {
+                drawDistribution(killed, pos, r_killed, 4)
+            }
+            //arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+            //rect(pos.x, pos.y, r_killed, r_killed)
 
-        fill(c2)
-        arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
-        //rect(pos.x, pos.y, r_wounded, r_wounded)
+            fill(c2)
+            drawDistribution(wounded, pos, r_wounded, 4)
+            //arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
+            //rect(pos.x, pos.y, r_wounded, r_wounded)
+        }
     })
 
     gerKilled = 0;
@@ -120,29 +148,33 @@ function drawStats() {
     dataGer.getRows().forEach(e => {
         const pos = myMap2.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
 
-        pos.y = pos.y + windowHeight / 2
-
         fill(c3)
         const killed = e.get(headers[1]);
         const wounded = e.get(headers[2]);
         gerKilled += int(killed);
         gerWounded += int(wounded);
-        const r_killed = sqrt(killed) / PI * scaleUp * curZoom
-        const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
+        const r_killed = sqrt(killed) / PI * scaleUp * (curZoom + 1)
+        const r_wounded = sqrt(wounded) / PI * scaleUp * (curZoom + 1)
 
-        if (r_wounded == 0)
-            ellipse(pos.x, pos.y, r_killed, r_killed)
-        //rect(pos.x, pos.y, r_killed, r_killed)
-        else
-            arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-        //rect(pos.x, pos.y, r_killed, r_killed)
 
-        fill(c4)
-        arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
-        //rect(pos.x, pos.y, r_wounded, r_wounded)
+        if (state === 1) {
+            if (r_wounded == 0)
+                drawDistribution(killed, pos, r_killed, 4)
+            //ellipse(pos.x, pos.y, r_killed, r_killed)
+            //rect(pos.x, pos.y, r_killed, r_killed)
+            else
+                drawDistribution(killed, pos, r_killed, 4)
+            //arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+            //rect(pos.x, pos.y, r_killed, r_killed)
+
+            fill(c4)
+            drawDistribution(wounded, pos, r_wounded, 4)
+            //arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
+            //rect(pos.x, pos.y, r_wounded, r_wounded)
+        }
     })
 
-    if (state === 1) {
+    if (state === 2) {
         clear()
         background(cLight)
         drawHtmlHeading()
@@ -196,11 +228,11 @@ function drawStats() {
         textSize(fontSize1)
         text("PER 100K HABITANTS", xOff2, windowHeight / 4 - rSize * 15)
     }
-    if (state === 2) {
+    if (state === 3) {
         clear()
         drawHtmlHeading()
     }
-    if (state === 3) {
+    if (state === 4) {
         clear()
         background(cLight)
 
@@ -299,12 +331,11 @@ function drawStats() {
     }
 }
 var done = false;
-var framesLeft = 60;
 let circleAnimation = 0.2;
 let circleAnimationDone = false;
 function draw() {
-    if (state === 2) {
-        if (!done || framesLeft-- > 0) {
+    if (state === 3) {
+        if (!done) {
             background(cLight)
             drawCircles()
             drawHtmlHeading()
@@ -313,12 +344,10 @@ function draw() {
         circles = [];
         curCircle = 0;
         nextCircles = [];
-        redDone = false;
         done = false;
-        framesLeft = 60;
     }
 
-    if (state === 3) {
+    if (state === 4) {
         if (!circleAnimationDone) {
             circleAnimation += 0.05;
             drawStats()
@@ -337,7 +366,6 @@ function draw() {
     }
 }
 var circles = [];
-var redDone = false;
 function drawCircles() {
 
     // All the circles
@@ -363,24 +391,9 @@ function drawCircles() {
     let count = 0;
     // Try N times
     for (let n = 0; n < 1000; n++) {
-        if (redDone) {
-            for (let n = 0; n < 1000; n++) {
-                if (curCircle >= dataGer.getRows().length) {
-                    break;
-                }
-                if (addCircle(dataGer)) {
-                    count++;
-                }
-                // We made enough
-                if (count == target) {
-                    break;
-                }
-            }
-            break;
-        }
         if (curCircle >= data.getRows().length) {
             curCircle = 0;
-            redDone = true;
+            done = true;
             break;
         }
         if (addCircle(data)) {
@@ -525,7 +538,6 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     textSize(fontSize2)
     textStyle(BOLD)
     textAlign(RIGHT)
-    textFont("Helvetica")
     const yCalc = inverted ? yOff + 4 * rSize : yOff + data / xSize * rSize - rSize / 2
     text(data, xOff - rSize, yCalc)
     rectMode(CENTER)
@@ -534,8 +546,8 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
 
 var state = 0;
 const stateAmount = 4;
-var fontSize1 = windowWidth / 35
-var fontSize2 = windowWidth / 40
+var fontSize1 = window.innerWidth / 35
+var fontSize2 = window.innerWidth / 40
 function drawHtmlHeading() {
     strokeWeight(0.4)
 
@@ -549,7 +561,7 @@ function drawHtmlHeading() {
         heading.style("text-align", "left")
         heading.style("padding", "10px 20px")
         heading.style("margin", "20px")
-        heading.style("font-family", "Helvetica")
+        heading.style("font-family", "IBM Plex Sans")
         heading.style("font-weight", "bold")
         heading.style("border-radius", "4rem")
         heading.style("left", "0")
