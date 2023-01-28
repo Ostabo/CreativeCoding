@@ -53,10 +53,21 @@ const headers = [
     "Dangerous warning signs"
 ]
 let canvas;
+//let sliderYear;
+//let label2;
 function setup() {
     canvas = createCanvas(windowWidth, windowHeight);
     textFont(font1)
     frameRate(20)
+
+    //label2 = createDiv("Year (2009 - 2022)")
+    //label2.style("color", "white")
+    //label2.style("z-index", "2000")
+    //label2.position(windowWidth / 2 - 65, windowHeight - 100)
+    //sliderYear = createSlider(2009, 2022, 0)
+    //sliderYear.position(windowWidth / 2 - 100, windowHeight - 60)
+    //sliderYear.input(drawStats)
+
     drawStats()
 }
 
@@ -71,10 +82,10 @@ const c8 = [176, 224, 255]
 const cDark = [20, 20, 20]
 const cLight = [250, 250, 250]
 
-function drawDistribution(count, pos, radius, size) {
-    for (let i = 1; i < count; i++) {
-        const f = i / count / 3;
-        const angle = i * (1 + Math.sqrt(2));
+function drawDistribution(count, pos, radius, size, sqrt) {
+    for (let i = 0; i < count; i++) {
+        const f = i / count / 2;
+        const angle = i * (1 + Math.sqrt(sqrt || 7));
         const dist = f * radius;
 
         const x = pos.x + cos(angle * TWO_PI) * dist;
@@ -95,6 +106,8 @@ const usaHabitants = 331.9;
 const gerHabitants = 83.2;
 function drawStats() {
     usaKilled = 0, usaWounded = 0, usaPreventable = 0, usaWarning = 0;
+    //label2.style("opacity", "0")
+    //sliderYear.style("opacity", "0")
     clear()
     image(staticImg, 0, 0)
 
@@ -122,24 +135,36 @@ function drawStats() {
         usaWounded += int(wounded);
         const r_killed = sqrt(killed) / PI * scaleUp * curZoom
         const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
-        fill(c1)
-
         if (state === 0) {
-            if (r_wounded == 0) {
-                drawDistribution(killed, pos, r_killed, 4)
-            }
+            fill(...c2, 20)
+            strokeWeight(0.2)
+            circle(pos.x, pos.y, r_wounded)
+            strokeWeight(0.4)
+            fill(...c1, 20)
+            strokeWeight(0.2)
+            circle(pos.x, pos.y, r_killed)
+            strokeWeight(0.4)
+            fill(c2)
+            if (killed <= wounded)
+                drawDistribution(wounded, pos, r_wounded, curZoom, 8)
+
+            fill(c1)
+            if (r_wounded == 0)
+                drawDistribution(killed, pos, r_killed, curZoom)
             //ellipse(pos.x, pos.y, r_killed, r_killed)
+            //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
             //rect(pos.x, pos.y, r_killed, r_killed)
-            else {
-                drawDistribution(killed, pos, r_killed, 4)
-            }
+            else
+                drawDistribution(killed, pos, r_killed, curZoom)
             //arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+            //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
             //rect(pos.x, pos.y, r_killed, r_killed)
 
             fill(c2)
-            drawDistribution(wounded, pos, r_wounded, 4)
             //arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
-            //rect(pos.x, pos.y, r_wounded, r_wounded)
+            if (wounded < killed) {
+                drawDistribution(wounded, pos, r_wounded, curZoom)
+            }
         }
     })
 
@@ -158,19 +183,35 @@ function drawStats() {
 
 
         if (state === 1) {
+            fill(...c2, 20)
+            strokeWeight(0.2)
+            circle(pos.x, pos.y, r_wounded)
+            strokeWeight(0.4)
+            fill(...c1, 20)
+            strokeWeight(0.2)
+            circle(pos.x, pos.y, r_killed)
+            strokeWeight(0.4)
+            fill(c2)
+            if (killed <= wounded)
+                drawDistribution(wounded, pos, r_wounded, curZoom, 8)
+
+            fill(c1)
             if (r_wounded == 0)
-                drawDistribution(killed, pos, r_killed, 4)
+                drawDistribution(killed, pos, r_killed, curZoom)
             //ellipse(pos.x, pos.y, r_killed, r_killed)
+            //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
             //rect(pos.x, pos.y, r_killed, r_killed)
             else
-                drawDistribution(killed, pos, r_killed, 4)
+                drawDistribution(killed, pos, r_killed, curZoom)
             //arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+            //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
             //rect(pos.x, pos.y, r_killed, r_killed)
 
-            fill(c4)
-            drawDistribution(wounded, pos, r_wounded, 4)
+            fill(c2)
             //arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
-            //rect(pos.x, pos.y, r_wounded, r_wounded)
+            if (wounded < killed) {
+                drawDistribution(wounded, pos, r_wounded, curZoom)
+            }
         }
     })
 
@@ -228,11 +269,11 @@ function drawStats() {
         textSize(fontSize1)
         text("PER 100K HABITANTS", xOff2, windowHeight / 4 - rSize * 15)
     }
-    if (state === 3) {
+    if (state === 5) {
         clear()
         drawHtmlHeading()
     }
-    if (state === 4) {
+    if (state === 3) {
         clear()
         background(cLight)
 
@@ -323,18 +364,78 @@ function drawStats() {
             arc(x2, y2, w2, w2, minA2, maxA2)
             stroke(cDark)
 
+            const o = 2
+            strokeWeight(.1)
+            line(x2, y2 + o, windowWidth / 10, y2 + o)
+            line(x, y - o, windowWidth / 10, y - o)
         })
-        strokeWeight(1)
-        line(windowWidth / 2, windowHeight / 2, windowWidth / 10, windowHeight / 2)
 
         drawHtmlHeading()
     }
+    if (state === 4) {
+        background(cDark)
+
+        //label2.html("Year: " + sliderYear.value())
+        //label2.style("opacity", "1")
+        //sliderYear.style("opacity", "1")
+
+        const spacing = windowWidth / (365 * 1.1);
+        const dotSize = 2;
+        let currentX = windowWidth / 16;
+        const currentY = windowHeight / 2;
+        //let lastDate = new Date(sliderYear.value(), 0, 1);
+
+        for (let i = 1; i <= 365; i++) {
+            fill(cLight)
+            circle(currentX + i * spacing, windowHeight / 2, dotSize)
+        }
+        //stroke(cLight)
+        //line(currentX, currentY, currentX + 365 * spacing, currentY)
+
+        data.getRows()/*.filter(row => {
+            return new Date(
+                row.get(headers[6])
+            ).getFullYear() === sliderYear.value()
+        })*/.map(x => {
+            return {
+                killed: x.get(headers[1]),
+                wounded: x.get(headers[2]),
+                datePerYear: daysIntoYear(new Date(x.get(headers[6])))
+            }
+        }).forEach(e => {
+
+            const { killed, wounded, datePerYear } = e;
+            //const diffDays = Math.ceil(Math.abs(datePerYear - lastDate) / (1000 * 60 * 60 * 24))
+
+            let currentX = spacing * datePerYear + windowWidth / 16;
+            //lastDate = datePerYear;
+
+            usaKilled += int(killed);
+            usaWounded += int(wounded);
+
+            strokeWeight(0.0)
+            for (let i = 1; i <= int(killed); i++) {
+                fill(c1)
+                circle(currentX, currentY - spacing * i * 1.5, dotSize)
+            }
+            for (let i = 1; i <= int(wounded); i++) {
+                fill(c2)
+                circle(currentX, currentY + spacing * i * 1.5, dotSize)
+            }
+
+        })
+
+        drawHtmlHeading()
+    }
+}
+function daysIntoYear(date) {
+    return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
 }
 var done = false;
 let circleAnimation = 0.2;
 let circleAnimationDone = false;
 function draw() {
-    if (state === 3) {
+    if (state === 5) {
         if (!done) {
             background(cLight)
             drawCircles()
@@ -347,7 +448,7 @@ function draw() {
         done = false;
     }
 
-    if (state === 4) {
+    if (state === 3) {
         if (!circleAnimationDone) {
             circleAnimation += 0.05;
             drawStats()
@@ -516,7 +617,8 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     stroke(cLight)
     for (let i = 1; i < data / xSize; i++) {
         for (let j = 0; j < xSize; j++) {
-            rect(j * rSize + xOff, i * rSize + yOff, rSize, rSize)
+            circle(j * rSize + xOff, i * rSize + yOff, rSize)
+            //rect(j * rSize + xOff, i * rSize + yOff, rSize, rSize)
         }
     }
     const calcY = inverted ? yOff + int(data / xSize + 1) * rSize : yOff
@@ -524,13 +626,15 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     for (let i = 0; i < leftOver; i++) {
         const leftOverF = leftOver - floor(leftOver);
         if (i >= leftOver - 1 && leftOverF > 0) {
-            rect(i * rSize + xOff,
-                calcY,
-                rSize * leftOverF, rSize)
+            circle(i * rSize + xOff, calcY, rSize * leftOverF)
+            //rect(i * rSize + xOff,
+            //    calcY,
+            //    rSize * leftOverF, rSize)
         } else {
-            rect(i * rSize + xOff,
-                calcY,
-                rSize, rSize)
+            circle(i * rSize + xOff, calcY, rSize)
+            //rect(i * rSize + xOff,
+            //    calcY,
+            //    rSize, rSize)
         }
     }
 
@@ -545,7 +649,7 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
 }
 
 var state = 0;
-const stateAmount = 4;
+const stateAmount = 5;
 var fontSize1 = window.innerWidth / 35
 var fontSize2 = window.innerWidth / 40
 function drawHtmlHeading() {
@@ -586,10 +690,12 @@ function drawHtmlHeading() {
 }
 
 function mousePressed() {
-    if (state === stateAmount - 1) {
-        state = 0
-    } else {
-        state++
+    if (mouseY < windowHeight - 120 || mouseX < windowWidth / 2 - 120 || mouseX > windowWidth / 2 + 100) {
+        if (state === stateAmount - 1) {
+            state = 0
+        } else {
+            state++
+        }
+        drawStats()
     }
-    drawStats()
 }

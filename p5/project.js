@@ -98,23 +98,42 @@ function drawStats() {
 
         const killed = e.get(headers[1]);
         const wounded = e.get(headers[2]);
-        const preventableGun = e.get(headers[7]) === "Yes";
-        const warning = e.get(headers[9]) === "Yes";
-        fill(warning ? c6 : c1)
+        //const preventableGun = e.get(headers[7]) === "Yes";
+        //const warning = e.get(headers[9]) === "Yes";
         usaKilled += int(killed);
         usaWounded += int(wounded);
         const r_killed = sqrt(killed) / PI * scaleUp * curZoom
         const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
 
+        fill(...c2, 20)
+        strokeWeight(0.2)
+        circle(pos.x, pos.y, r_wounded)
+        strokeWeight(0.4)
+        fill(...c1, 20)
+        strokeWeight(0.2)
+        circle(pos.x, pos.y, r_killed)
+        strokeWeight(0.4)
+        fill(c2)
+        if (killed <= wounded)
+            drawDistribution(wounded, pos, r_wounded, curZoom, 8)
+
+        fill(c1)
         if (r_wounded == 0)
-            preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
+            drawDistribution(killed, pos, r_killed, curZoom)
+        //ellipse(pos.x, pos.y, r_killed, r_killed)
+        //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
         //rect(pos.x, pos.y, r_killed, r_killed)
         else
-            preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+            drawDistribution(killed, pos, r_killed, curZoom)
+        //arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
+        //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
         //rect(pos.x, pos.y, r_killed, r_killed)
 
         fill(c2)
-        arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
+        //arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
+        if (wounded < killed) {
+            drawDistribution(wounded, pos, r_wounded, curZoom)
+        }
         //rect(pos.x, pos.y, r_wounded, r_wounded)
         const nar = e.get(headers[5])
         if (curZoom > 5) {
@@ -136,4 +155,17 @@ function drawStats() {
             labelCache.push(narLabel)
         }
     })
+}
+
+function drawDistribution(count, pos, radius, size, sqrt) {
+    for (let i = 0; i < count; i++) {
+        const f = i / count / 2;
+        const angle = i * (1 + Math.sqrt(sqrt || 7));
+        const dist = f * radius;
+
+        const x = pos.x + cos(angle * TWO_PI) * dist;
+        const y = pos.y + sin(angle * TWO_PI) * dist;
+
+        circle(x, y, size);
+    }
 }
