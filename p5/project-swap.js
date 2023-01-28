@@ -79,7 +79,7 @@ const c5 = [200, 0, 0]
 const c6 = [255, 255, 26]
 const c7 = [150, 250, 0]
 const c8 = [176, 224, 255]
-const cDark = [20, 20, 20]
+const cDark = [25, 26, 26]
 const cLight = [250, 250, 250]
 
 function drawDistribution(count, pos, radius, size, sqrt) {
@@ -95,7 +95,7 @@ function drawDistribution(count, pos, radius, size, sqrt) {
     }
 }
 
-const scaleUp = 6
+const scaleUp = 10
 let usaKilled = 0;
 let usaWounded = 0;
 let usaPreventable = 0;
