@@ -18,7 +18,10 @@ function preload() {
         zoom: curZoom,
         width: int(width),
         height: int(height),
+        username: 'mapbox',
         style: 'dark-v9',
+        setfilter: ["==", "name_en", ""],
+        layer_id: 'settlement-label',
         //style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
@@ -34,7 +37,7 @@ function preload() {
         width: int(width),
         height: int(height),
         style: 'dark-v9'
-        // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
+        //style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
     myMap2 = mappa.staticMap(options2);
@@ -67,6 +70,27 @@ function setup() {
     //sliderYear = createSlider(2009, 2022, 0)
     //sliderYear.position(windowWidth / 2 - 100, windowHeight - 60)
     //sliderYear.input(drawStats)
+    dayLabelL = createDiv('Day/Month')
+    dayLabelL.style("color", "white")
+    dayLabelL.style("font-size", int(fontSize2) + "px")
+    dayLabelL.style("text-align", "left")
+    dayLabelL.style("font-family", "IBM Plex Sans")
+    dayLabelL.style("font-weight", "bold")
+    dayLabelL.style("user-select", "none")
+    dayLabelL.style("padding", "10px 20px")
+    dayLabelL.style("margin", "calc(20px + 1em) 20px")
+    dayLabelL.position(windowWidth / 12, windowHeight - windowHeight / 6)
+
+    dayLabel = createDiv("")
+    dayLabel.style("color", "white")
+    dayLabel.style("font-size", int(fontSize2) + "px")
+    dayLabel.style("text-align", "left")
+    dayLabel.style("font-family", "IBM Plex Sans")
+    dayLabel.style("font-weight", "bold")
+    dayLabel.style("user-select", "none")
+    dayLabel.style("padding", "10px 20px")
+    dayLabel.style("margin", "20px")
+    dayLabel.position(windowWidth / 12, windowHeight - windowHeight / 6)
 
     drawStats()
 }
@@ -83,10 +107,11 @@ const cDark = [25, 26, 26]
 const cLight = [250, 250, 250]
 
 function drawDistribution(count, pos, radius, size, sqrt) {
+    const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
         const f = i / count / 2;
-        const angle = i * (1 + Math.sqrt(sqrt || 7));
-        const dist = f * radius;
+        const angle = i * Math.sqrt(sqrt || 7);
+        const dist = f * radius + centerBuffer;
 
         const x = pos.x + cos(angle * TWO_PI) * dist;
         const y = pos.y + sin(angle * TWO_PI) * dist;
@@ -104,8 +129,15 @@ let gerKilled = 0;
 let gerWounded = 0;
 const usaHabitants = 331.9;
 const gerHabitants = 83.2;
+
+const spacing = window.innerWidth / (365 * 1.1);
+const dotSize = 2;
+let currentX = window.innerWidth / 16;
+const currentY = window.innerHeight / 2;
 function drawStats() {
     usaKilled = 0, usaWounded = 0, usaPreventable = 0, usaWarning = 0;
+    dayLabel.style("opacity", "0")
+    dayLabelL.style("opacity", "0")
     //label2.style("opacity", "0")
     //sliderYear.style("opacity", "0")
     clear()
@@ -273,7 +305,7 @@ function drawStats() {
         clear()
         drawHtmlHeading()
     }
-    if (state === 3) {
+    if (state === 4) {
         clear()
         background(cLight)
 
@@ -372,18 +404,27 @@ function drawStats() {
 
         drawHtmlHeading()
     }
-    if (state === 4) {
+    if (state === 3) {
         background(cDark)
+        dayLabel.style("opacity", "1")
+        dayLabelL.style("opacity", "1")
 
         //label2.html("Year: " + sliderYear.value())
         //label2.style("opacity", "1")
         //sliderYear.style("opacity", "1")
 
-        const spacing = windowWidth / (365 * 1.1);
-        const dotSize = 2;
-        let currentX = windowWidth / 16;
-        const currentY = windowHeight / 2;
         //let lastDate = new Date(sliderYear.value(), 0, 1);
+
+        // draw arrow shaped lines at the end of the year
+        strokeWeight(1)
+        drawingContext.setLineDash([dotSize, dotSize]);
+        stroke(cLight)
+        line(windowWidth / 16, windowHeight / 2 - 20, windowWidth / 16, windowHeight / 2 + 20)
+        line(windowWidth / 16 + 372 * spacing, windowHeight / 2, windowWidth / 16 + 367 * spacing, windowHeight / 2 + 10)
+        line(windowWidth / 16 + 372 * spacing, windowHeight / 2, windowWidth / 16 + 365 * spacing, windowHeight / 2)
+        line(windowWidth / 16 + 372 * spacing, windowHeight / 2, windowWidth / 16 + 367 * spacing, windowHeight / 2 - 10)
+        strokeWeight(0.0)
+        drawingContext.setLineDash([]);
 
         for (let i = 1; i <= 365; i++) {
             fill(cLight)
@@ -448,7 +489,7 @@ function draw() {
         done = false;
     }
 
-    if (state === 3) {
+    if (state === 4) {
         if (!circleAnimationDone) {
             circleAnimation += 0.05;
             drawStats()
@@ -649,11 +690,11 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
 }
 
 var state = 0;
-const stateAmount = 5;
+const stateAmount = 4;
 var fontSize1 = window.innerWidth / 35
 var fontSize2 = window.innerWidth / 40
 function drawHtmlHeading() {
-    strokeWeight(0.4)
+    strokeWeight(1)
 
     if (!document.getElementById("heading")) {
         const heading = createDiv("MASS SHOOTINGS 2009 - 2022")
@@ -697,5 +738,50 @@ function mousePressed() {
             state++
         }
         drawStats()
+    }
+}
+
+var dayLabel, dayLabelL;
+function mouseMoved() {
+    if (state === 3) {
+        // array of all dates in a year
+        const dates = []
+        for (let i = 0; i < 12; i++) {
+            for (let j = 0; j < 31; j++) {
+
+                if (i === 1 && j > 27) {
+                    break
+                }
+                if (i === 3 && j > 29) {
+                    break
+                }
+                if (i === 5 && j > 29) {
+                    break
+                }
+                if (i === 8 && j > 29) {
+                    break
+                }
+                if (i === 10 && j > 29) {
+                    break
+                }
+
+                dates.push(`${i + 1}/${j + 1}`)
+            }
+        }
+
+        // get the date of the mouse
+        const mouseDate = dates[
+            int(
+                map(mouseX,
+                    currentX, currentX + 365 * (spacing),
+                    0, dates.length)
+            )
+        ]
+        if (mouseDate) {
+            dayLabel.html(mouseDate)
+            //dayLabel.position(mouseX - 20, windowHeight - 100)
+            //dayLabelL.position(mouseX - 20, windowHeight - 100)
+        }
+
     }
 }

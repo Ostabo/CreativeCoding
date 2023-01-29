@@ -39,8 +39,10 @@ const options = {
     lat: 39,
     lng: -96,
     zoom: curZoom,
-    // style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
-    style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
+    //style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
+    //style: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+    //style: "https://stamen-tiles-{s}.a.ssl.fastly.net/toner-background/{z}/{x}/{y}{r}.png"
+    style: "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
 };
 
 let sliderYear;
@@ -105,15 +107,15 @@ function drawStats() {
         const r_killed = sqrt(killed) / PI * scaleUp * curZoom
         const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
 
-        fill(...c2, 20)
-        strokeWeight(0.2)
-        circle(pos.x, pos.y, r_wounded)
-        strokeWeight(0.4)
-        fill(...c1, 20)
-        strokeWeight(0.2)
-        circle(pos.x, pos.y, r_killed)
-        strokeWeight(0.4)
-        fill(c2)
+        //fill(...c2, 20)
+        //strokeWeight(0.2)
+        //circle(pos.x, pos.y, r_wounded)
+        //strokeWeight(0.4)
+        //fill(...c1, 20)
+        //strokeWeight(0.2)
+        //circle(pos.x, pos.y, r_killed)
+        //strokeWeight(0.4)
+        //fill(c2)
         if (killed <= wounded)
             drawDistribution(wounded, pos, r_wounded, curZoom, 8)
 
@@ -158,10 +160,11 @@ function drawStats() {
 }
 
 function drawDistribution(count, pos, radius, size, sqrt) {
+    const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
         const f = i / count / 2;
-        const angle = i * (1 + Math.sqrt(sqrt || 7));
-        const dist = f * radius;
+        const angle = i * Math.sqrt(sqrt || 7);
+        const dist = f * radius + centerBuffer;
 
         const x = pos.x + cos(angle * TWO_PI) * dist;
         const y = pos.y + sin(angle * TWO_PI) * dist;
