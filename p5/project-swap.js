@@ -109,7 +109,7 @@ const cLight = [250, 250, 250]
 function drawDistribution(count, pos, radius, size, sqrt) {
     const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
-        const f = i / count / 2;
+        const f = i / count / (2 + centerBuffer * .04);
         const angle = i * Math.sqrt(sqrt || 7);
         const dist = f * radius + centerBuffer;
 
@@ -274,6 +274,10 @@ function drawStats() {
         textAlign(LEFT)
         textSize(fontSize1)
         text("TOTAL", xOff, windowHeight / 4 - rSize * 15)
+        push()
+        rotate(PI / 2)
+        text("USA", windowWidth / 4 + rSize * 17.5, - windowHeight + 10)
+        pop()
         textAlign(LEFT)
 
         const usaKilledPerTHabi = round(usaKilled / usaHabitants * 10, 2);
@@ -300,6 +304,10 @@ function drawStats() {
         textAlign(LEFT)
         textSize(fontSize1)
         text("PER 100K HABITANTS", xOff2, windowHeight / 4 - rSize * 15)
+        push()
+        rotate(PI / 2)
+        text("GERMANY", windowWidth - windowWidth / 4 - rSize * 10, - windowHeight + 10)
+        pop()
     }
     if (state === 5) {
         clear()

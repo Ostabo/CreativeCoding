@@ -162,7 +162,7 @@ function drawStats() {
 function drawDistribution(count, pos, radius, size, sqrt) {
     const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
-        const f = i / count / 2;
+        const f = i / count / (2 + centerBuffer * .04);
         const angle = i * Math.sqrt(sqrt || 7);
         const dist = f * radius + centerBuffer;
 
