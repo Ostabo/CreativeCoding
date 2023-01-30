@@ -72,7 +72,7 @@ function setup() {
     //sliderYear.input(drawStats)
     dayLabelL = createDiv('Day/Month')
     dayLabelL.style("color", "white")
-    dayLabelL.style("font-size", int(fontSize2) + "px")
+    dayLabelL.style("font-size", int(fontSize1) + "px")
     dayLabelL.style("text-align", "left")
     dayLabelL.style("font-family", "IBM Plex Sans")
     dayLabelL.style("font-weight", "bold")
@@ -83,7 +83,7 @@ function setup() {
 
     dayLabel = createDiv("")
     dayLabel.style("color", "white")
-    dayLabel.style("font-size", int(fontSize2) + "px")
+    dayLabel.style("font-size", int(fontSize1) + 2 + "px")
     dayLabel.style("text-align", "left")
     dayLabel.style("font-family", "IBM Plex Sans")
     dayLabel.style("font-weight", "bold")
@@ -276,7 +276,7 @@ function drawStats() {
         text("TOTAL", xOff, windowHeight / 4 - rSize * 15)
         push()
         rotate(PI / 2)
-        text("USA", windowWidth / 4 + rSize * 17.5, - windowHeight + 10)
+        text("USA", windowHeight / 4 + rSize * 17.5, - windowWidth + xOff)
         pop()
         textAlign(LEFT)
 
@@ -306,7 +306,7 @@ function drawStats() {
         text("PER 100K HABITANTS", xOff2, windowHeight / 4 - rSize * 15)
         push()
         rotate(PI / 2)
-        text("GERMANY", windowWidth - windowWidth / 4 - rSize * 10, - windowHeight + 10)
+        text("GERMANY", windowHeight - windowHeight / 4 - rSize * 10, - windowWidth + xOff)
         pop()
     }
     if (state === 5) {
