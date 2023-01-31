@@ -20,8 +20,6 @@ function preload() {
         height: int(height),
         username: 'mapbox',
         style: 'dark-v9',
-        setfilter: ["==", "name_en", ""],
-        layer_id: 'settlement-label',
         //style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
@@ -70,7 +68,7 @@ function setup() {
     //sliderYear = createSlider(2009, 2022, 0)
     //sliderYear.position(windowWidth / 2 - 100, windowHeight - 60)
     //sliderYear.input(drawStats)
-    dayLabelL = createDiv('Day/Month')
+    dayLabelL = createDiv('Month/Day')
     dayLabelL.style("color", "white")
     dayLabelL.style("font-size", int(fontSize1) + "px")
     dayLabelL.style("text-align", "left")
@@ -110,7 +108,7 @@ function drawDistribution(count, pos, radius, size, sqrt) {
     const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
         const f = i / count / (2 + centerBuffer * .04);
-        const angle = i * Math.sqrt(sqrt || 7);
+        const angle = i * Math.sqrt(sqrt || 23);
         const dist = f * radius + centerBuffer;
 
         const x = pos.x + cos(angle * TWO_PI) * dist;
@@ -171,9 +169,7 @@ function drawStats() {
             fill(...c2, 20)
             strokeWeight(0.2)
             circle(pos.x, pos.y, r_wounded)
-            strokeWeight(0.4)
             fill(...c1, 20)
-            strokeWeight(0.2)
             circle(pos.x, pos.y, r_killed)
             strokeWeight(0.4)
             fill(c2)
