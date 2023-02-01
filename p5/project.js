@@ -49,14 +49,11 @@ let sliderYear;
 function setup() {
     canvas = createCanvas(windowWidth, windowHeight);
 
-    let label2 = createDiv("Year (2009 - 2022)")
-    label2.style("color", "white")
-    label2.style("background-color", "black")
-    label2.style("z-index", "2000")
-    label2.position(windowWidth / 2 - 80, windowHeight - 80)
     sliderYear = createSlider(2009, 2022, 0)
-    sliderYear.position(windowWidth / 2 - 100, windowHeight - 60)
+    sliderYear.position(windowWidth * .1, windowHeight - 60)
     sliderYear.style("z-index", "2000")
+    sliderYear.style("width", "80%")
+    sliderYear.class("slider")
     sliderYear.input(drawStats)
 
     myMap = mappa.tileMap(options);
@@ -79,10 +76,25 @@ function drawStats() {
 
     let labelCur = createDiv(sliderYear.value())
     labelCur.style("color", "white")
-    labelCur.style("background-color", "black")
+    labelCur.style("font-family", "IBM Plex Sans")
     labelCur.style("z-index", "2000")
-    labelCur.position(windowWidth / 2 - 35, windowHeight - 40)
+    labelCur.position(windowWidth * .1 + (sliderYear.value() - 2009) * (windowWidth * .8 / 13.5) - 2, windowHeight - 30)
     labelCache.push(labelCur)
+
+    // labels for 2009 and 2022
+    let label2009 = createDiv("2009")
+    label2009.style("color", "white")
+    label2009.style("font-family", "IBM Plex Sans")
+    label2009.style("z-index", "2000")
+    label2009.position(windowWidth * .1 - 2, windowHeight - 30)
+    labelCache.push(label2009)
+
+    let label2022 = createDiv("2022")
+    label2022.style("color", "white")
+    label2022.style("font-family", "IBM Plex Sans")
+    label2022.style("z-index", "2000")
+    label2022.position(windowWidth * .1 + 13 * (windowWidth * .8 / 13.5) - 2, windowHeight - 30)
+    labelCache.push(label2022)
 
     //myMap.map.setMaxBounds(maxBounds)
     //myMap.map.fitBounds(maxBounds)
@@ -110,31 +122,18 @@ function drawStats() {
         //fill(...c2, 20)
         //strokeWeight(0.2)
         //circle(pos.x, pos.y, r_wounded)
-        //strokeWeight(0.4)
         //fill(...c1, 20)
-        //strokeWeight(0.2)
         //circle(pos.x, pos.y, r_killed)
-        //strokeWeight(0.4)
-        //fill(c2)
-        if (killed <= wounded)
-            drawDistribution(wounded, pos, r_wounded, curZoom, 8)
-
-        fill(c1)
-        if (r_wounded == 0)
-            drawDistribution(killed, pos, r_killed, curZoom)
-        //ellipse(pos.x, pos.y, r_killed, r_killed)
-        //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
-        //rect(pos.x, pos.y, r_killed, r_killed)
-        else
-            drawDistribution(killed, pos, r_killed, curZoom)
-        //arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-        //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-        //rect(pos.x, pos.y, r_killed, r_killed)
-
+        strokeWeight(0.4)
         fill(c2)
-        //arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
-        if (wounded < killed) {
+        if (r_killed < r_wounded) {
+            drawDistribution(wounded, pos, r_wounded, curZoom, r_wounded / 2)
+            fill(c1)
+            drawDistribution(killed, pos, r_killed, curZoom)
+        } else {
             drawDistribution(wounded, pos, r_wounded, curZoom)
+            fill(c1)
+            drawDistribution(killed, pos, r_killed, curZoom, r_killed / 2)
         }
         //rect(pos.x, pos.y, r_wounded, r_wounded)
         const nar = e.get(headers[5])
@@ -146,7 +145,7 @@ function drawStats() {
             narLabel.style("width", 40 * curZoom + "px")
             narLabel.style("font-size", curZoom * 2 + "px")
             narLabel.style("z-index", "2000")
-            narLabel.style("text-align", "center")
+            narLabel.style("text-align", "start")
             narLabel.style("padding", "5px")
             narLabel.style("border-radius", "5px")
             narLabel.style("transform", "translate(-50%, -50%)")
@@ -159,12 +158,12 @@ function drawStats() {
     })
 }
 
-function drawDistribution(count, pos, radius, size, sqrt) {
+function drawDistribution(count, pos, radius, size, customBuffer) {
     const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
-        const f = i / count / (2 + centerBuffer * .04);
-        const angle = i * Math.sqrt(sqrt || 7);
-        const dist = f * radius + centerBuffer;
+        const f = i / count / (customBuffer || (2 + centerBuffer * .04));
+        const angle = i * 1.618033988749895;
+        const dist = f * radius + (customBuffer || centerBuffer);
 
         const x = pos.x + cos(angle * TWO_PI) * dist;
         const y = pos.y + sin(angle * TWO_PI) * dist;

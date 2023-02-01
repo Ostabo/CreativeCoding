@@ -4,13 +4,16 @@ let staticImg, staticImg2;
 let curZoom = 3;
 let myMap, myMap2;
 let font1, font2;
+function smallerScreen() {
+    return windowWidth < 785 ? windowWidth < 675 ? windowWidth < 560 ? windowWidth < 400 ? -250 : -175 : -140 : -100 : 0;
+}
 function preload() {
     data = loadTable('everytownresearch-massshootings.csv', 'csv', 'header');
     dataGer = loadTable('germany-massshootings.csv', 'csv', 'header');
     font1 = loadFont('IBMPlexSans-Italic.otf');
     font2 = loadFont('IBMPlexSans-TextItalic.otf');
 
-    const [width, height] = [window.innerWidth, window.innerHeight]
+    const [width, height] = [976 + smallerScreen() * 2, 925]
 
     const options = {
         lat: 40,
@@ -26,8 +29,8 @@ function preload() {
     const key = 'pk.eyJ1Ijoic2FyYWFzZGF1Z2JqZXJnIiwiYSI6ImNqbWhua2owMjJleTkzdnE0bDlzZHl6YmcifQ.QD5xpdK9hOwzH427mF5_4Q'
     const mappa = new Mappa('Mapbox', key);
     myMap = mappa.staticMap(options);
-    staticImg = loadImage(myMap.imgUrl)
-
+    //staticImg = loadImage(myMap.imgUrl)
+    staticImg = loadImage("map-usa.png")
     const options2 = {
         lat: 50,
         lng: 12,
@@ -39,7 +42,8 @@ function preload() {
         //style: "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
     };
     myMap2 = mappa.staticMap(options2);
-    staticImg2 = loadImage(myMap2.imgUrl)
+    //staticImg2 = loadImage(myMap2.imgUrl)
+    staticImg2 = loadImage("map-ger.png")
 }
 const headers = [
     "Address",
@@ -58,6 +62,7 @@ let canvas;
 //let label2;
 function setup() {
     canvas = createCanvas(windowWidth, windowHeight);
+    canvas.mouseWheel(changeSize);
     textFont(font1)
     frameRate(20)
 
@@ -101,15 +106,15 @@ const c5 = [200, 0, 0]
 const c6 = [255, 255, 26]
 const c7 = [150, 250, 0]
 const c8 = [176, 224, 255]
-const cDark = [25, 26, 26]
+const cDark = [38, 38, 38]
 const cLight = [250, 250, 250]
 
-function drawDistribution(count, pos, radius, size, sqrt) {
+function drawDistribution(count, pos, radius, size, customBuffer) {
     const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
-        const f = i / count / (2 + centerBuffer * .04);
-        const angle = i * Math.sqrt(sqrt || 23);
-        const dist = f * radius + centerBuffer;
+        const f = i / count / (customBuffer || (2 + centerBuffer * .04));
+        const angle = i * 1.618033988749895;
+        const dist = f * radius + (customBuffer || centerBuffer);
 
         const x = pos.x + cos(angle * TWO_PI) * dist;
         const y = pos.y + sin(angle * TWO_PI) * dist;
@@ -130,7 +135,7 @@ const gerHabitants = 83.2;
 
 const spacing = window.innerWidth / (365 * 1.1);
 const dotSize = 2;
-let currentX = window.innerWidth / 16;
+let currentX = window.innerWidth / 32;
 const currentY = window.innerHeight / 2;
 function drawStats() {
     usaKilled = 0, usaWounded = 0, usaPreventable = 0, usaWarning = 0;
@@ -139,11 +144,13 @@ function drawStats() {
     //label2.style("opacity", "0")
     //sliderYear.style("opacity", "0")
     clear()
-    image(staticImg, 0, 0)
+    background(cDark)
+    image(staticImg, smallerScreen(), 0)
 
     if (state === 1) {
         clear()
-        image(staticImg2, 0, 0)
+        background(cDark)
+        image(staticImg2, smallerScreen(), 0)
     }
     drawHtmlHeading()
 
@@ -173,25 +180,15 @@ function drawStats() {
             circle(pos.x, pos.y, r_killed)
             strokeWeight(0.4)
             fill(c2)
-            if (killed <= wounded)
-                drawDistribution(wounded, pos, r_wounded, curZoom, 8)
-
-            fill(c1)
-            if (r_wounded == 0)
+            stroke(cDark)
+            if (r_killed < r_wounded) {
+                drawDistribution(wounded, pos, r_wounded, curZoom, r_wounded / 2)
+                fill(c1)
                 drawDistribution(killed, pos, r_killed, curZoom)
-            //ellipse(pos.x, pos.y, r_killed, r_killed)
-            //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
-            //rect(pos.x, pos.y, r_killed, r_killed)
-            else
-                drawDistribution(killed, pos, r_killed, curZoom)
-            //arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-            //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-            //rect(pos.x, pos.y, r_killed, r_killed)
-
-            fill(c2)
-            //arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
-            if (wounded < killed) {
+            } else {
                 drawDistribution(wounded, pos, r_wounded, curZoom)
+                fill(c1)
+                drawDistribution(killed, pos, r_killed, curZoom, r_killed / 2)
             }
         }
     })
@@ -201,7 +198,6 @@ function drawStats() {
     dataGer.getRows().forEach(e => {
         const pos = myMap2.latLngToPixel(e.get(headers[3]), e.get(headers[4]));
 
-        fill(c3)
         const killed = e.get(headers[1]);
         const wounded = e.get(headers[2]);
         gerKilled += int(killed);
@@ -214,38 +210,26 @@ function drawStats() {
             fill(...c2, 20)
             strokeWeight(0.2)
             circle(pos.x, pos.y, r_wounded)
-            strokeWeight(0.4)
             fill(...c1, 20)
-            strokeWeight(0.2)
             circle(pos.x, pos.y, r_killed)
             strokeWeight(0.4)
             fill(c2)
-            if (killed <= wounded)
-                drawDistribution(wounded, pos, r_wounded, curZoom, 8)
-
-            fill(c1)
-            if (r_wounded == 0)
+            stroke(cDark)
+            if (r_killed < r_wounded) {
+                drawDistribution(wounded, pos, r_wounded, curZoom, r_wounded / 2)
+                fill(c1)
                 drawDistribution(killed, pos, r_killed, curZoom)
-            //ellipse(pos.x, pos.y, r_killed, r_killed)
-            //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x + r_killed / 2, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y + r_killed / 2) : ellipse(pos.x, pos.y, r_killed, r_killed)
-            //rect(pos.x, pos.y, r_killed, r_killed)
-            else
-                drawDistribution(killed, pos, r_killed, curZoom)
-            //arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-            //preventableGun ? triangle(pos.x, pos.y - r_killed / 2, pos.x, pos.y + r_killed / 2, pos.x - r_killed / 2, pos.y) : arc(pos.x, pos.y, r_killed, r_killed, HALF_PI, PI + HALF_PI)
-            //rect(pos.x, pos.y, r_killed, r_killed)
-
-            fill(c2)
-            //arc(pos.x, pos.y, r_wounded, r_wounded, PI + HALF_PI, TWO_PI + HALF_PI)
-            if (wounded < killed) {
+            } else {
                 drawDistribution(wounded, pos, r_wounded, curZoom)
+                fill(c1)
+                drawDistribution(killed, pos, r_killed, curZoom, r_killed / 2)
             }
         }
     })
 
     if (state === 2) {
         clear()
-        background(cLight)
+        background(cDark)
         drawHtmlHeading()
 
         const rSize = windowWidth / 150
@@ -253,11 +237,11 @@ function drawStats() {
         const xOff = windowWidth / 4 - bCount / 2 * rSize * .75
         drawRects(c1, rSize, bCount,
             xOff,
-            windowHeight / 4 - rSize * 10,
+            windowHeight / 4,
             usaKilled, false)
         drawRects(c2, rSize, bCount,
             xOff,
-            windowHeight / 4 + rSize * 22,
+            windowHeight / 4 + rSize * 32,
             usaWounded, true)
         drawRects(c3, rSize, bCount,
             xOff,
@@ -269,10 +253,11 @@ function drawStats() {
             gerWounded, true)
         textAlign(LEFT)
         textSize(fontSize1)
-        text("TOTAL", xOff, windowHeight / 4 - rSize * 15)
+        fill(cLight)
+        text("TOTAL", xOff, windowHeight / 4 - rSize * 5)
         push()
         rotate(PI / 2)
-        text("USA", windowHeight / 4 + rSize * 17.5, - windowWidth + xOff)
+        text("USA", windowHeight / 4 + rSize * 27.5, - windowWidth + xOff * .75)
         pop()
         textAlign(LEFT)
 
@@ -283,11 +268,11 @@ function drawStats() {
         const xOff2 = windowWidth / 4 + bCount / 2 * rSize * 1.75
         drawRects(c1, rSize, bCount,
             xOff2,
-            windowHeight / 4 + rSize * 22,
+            windowHeight / 4 + rSize * 32,
             usaKilledPerTHabi, false)
         drawRects(c2, rSize, bCount,
             xOff2,
-            windowHeight / 4 + rSize * 22,
+            windowHeight / 4 + rSize * 32,
             usaWoundedPerTHabi, true)
         drawRects(c3, rSize, bCount,
             xOff2,
@@ -299,10 +284,11 @@ function drawStats() {
             gerWoundedPerTHabi, true)
         textAlign(LEFT)
         textSize(fontSize1)
-        text("PER 100K HABITANTS", xOff2, windowHeight / 4 - rSize * 15)
+        fill(cLight)
+        text("PER 100K HABITANTS", xOff2, windowHeight / 4 - rSize * 5)
         push()
         rotate(PI / 2)
-        text("GERMANY", windowHeight - windowHeight / 4 - rSize * 10, - windowWidth + xOff)
+        text("GERMANY", windowHeight - windowHeight / 4 - rSize * 10, - windowWidth + xOff * .75)
         pop()
     }
     if (state === 5) {
@@ -410,67 +396,6 @@ function drawStats() {
     }
     if (state === 3) {
         background(cDark)
-        dayLabel.style("opacity", "1")
-        dayLabelL.style("opacity", "1")
-
-        //label2.html("Year: " + sliderYear.value())
-        //label2.style("opacity", "1")
-        //sliderYear.style("opacity", "1")
-
-        //let lastDate = new Date(sliderYear.value(), 0, 1);
-
-        // draw arrow shaped lines at the end of the year
-        strokeWeight(1)
-        drawingContext.setLineDash([dotSize, dotSize]);
-        stroke(cLight)
-        line(windowWidth / 16, windowHeight / 2 - 20, windowWidth / 16, windowHeight / 2 + 20)
-        line(windowWidth / 16 + 372 * spacing, windowHeight / 2, windowWidth / 16 + 367 * spacing, windowHeight / 2 + 10)
-        line(windowWidth / 16 + 372 * spacing, windowHeight / 2, windowWidth / 16 + 365 * spacing, windowHeight / 2)
-        line(windowWidth / 16 + 372 * spacing, windowHeight / 2, windowWidth / 16 + 367 * spacing, windowHeight / 2 - 10)
-        strokeWeight(0.0)
-        drawingContext.setLineDash([]);
-
-        for (let i = 1; i <= 365; i++) {
-            fill(cLight)
-            circle(currentX + i * spacing, windowHeight / 2, dotSize)
-        }
-        //stroke(cLight)
-        //line(currentX, currentY, currentX + 365 * spacing, currentY)
-
-        data.getRows()/*.filter(row => {
-            return new Date(
-                row.get(headers[6])
-            ).getFullYear() === sliderYear.value()
-        })*/.map(x => {
-            return {
-                killed: x.get(headers[1]),
-                wounded: x.get(headers[2]),
-                datePerYear: daysIntoYear(new Date(x.get(headers[6])))
-            }
-        }).forEach(e => {
-
-            const { killed, wounded, datePerYear } = e;
-            //const diffDays = Math.ceil(Math.abs(datePerYear - lastDate) / (1000 * 60 * 60 * 24))
-
-            let currentX = spacing * datePerYear + windowWidth / 16;
-            //lastDate = datePerYear;
-
-            usaKilled += int(killed);
-            usaWounded += int(wounded);
-
-            strokeWeight(0.0)
-            for (let i = 1; i <= int(killed); i++) {
-                fill(c1)
-                circle(currentX, currentY - spacing * i * 1.5, dotSize)
-            }
-            for (let i = 1; i <= int(wounded); i++) {
-                fill(c2)
-                circle(currentX, currentY + spacing * i * 1.5, dotSize)
-            }
-
-        })
-
-        drawHtmlHeading()
     }
 }
 function daysIntoYear(date) {
@@ -479,6 +404,9 @@ function daysIntoYear(date) {
 var done = false;
 let circleAnimation = 0.2;
 let circleAnimationDone = false;
+var sc = 1;
+var tX = window.innerWidth / 2;
+var tY = window.innerHeight / 2;
 function draw() {
     if (state === 5) {
         if (!done) {
@@ -509,6 +437,82 @@ function draw() {
     } else {
         circleAnimation = 0.2;
         circleAnimationDone = false;
+    }
+
+    if (state === 3) {
+        background(cDark)
+        dayLabel.style("opacity", "1")
+        dayLabelL.style("opacity", "1")
+        strokeWeight(0)
+        push()
+
+        translate(tX, tY)
+        scale(sc)
+        translate(-tX, -tY)
+
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        const mIndex = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+        for (let i = 1; i <= 365; i++) {
+            fill(cLight)
+            circle(currentX + i * spacing, windowHeight / 2, dotSize)
+
+            // draw labels for each month
+            const d = mIndex.indexOf(i - 1)
+            if (d > -1) {
+                fill(cLight)
+                textAlign(CENTER, CENTER)
+                textSize(15)
+                const y = ((windowHeight / 1.3 + 30) / sqrt(sc)) > windowHeight / 2 + 60 ? (windowHeight / 1.3 + 30) / sqrt(sc) : windowHeight / 2 + 60
+                text(months[d], currentX + i * spacing + 10, y)
+                strokeWeight(.4)
+                stroke(cLight)
+                line(currentX + i * spacing, y - 20, currentX + i * spacing, (windowHeight / 2 + 10))
+                line(currentX + i * spacing, y - 20, currentX + i * spacing + 10, y - 10)
+                strokeWeight(0)
+            }
+        }
+        //stroke(cLight)
+        //line(currentX, currentY, currentX + 365 * spacing, currentY)
+
+        data.getRows()/*.filter(row => {
+            return new Date(
+                row.get(headers[6])
+            ).getFullYear() === sliderYear.value()
+        })*/.map(x => {
+            return {
+                killed: x.get(headers[1]),
+                wounded: x.get(headers[2]),
+                datePerYear: daysIntoYear(new Date(x.get(headers[6])))
+            }
+        }).forEach(e => {
+
+            const { killed, wounded, datePerYear } = e;
+            //const diffDays = Math.ceil(Math.abs(datePerYear - lastDate) / (1000 * 60 * 60 * 24))
+
+            let currentX = spacing * datePerYear + windowWidth / 32;
+            //lastDate = datePerYear;
+
+            usaKilled += int(killed);
+            usaWounded += int(wounded);
+
+            strokeWeight(0.0)
+            for (let i = 1; i <= int(killed); i++) {
+                fill(c1)
+                circle(currentX, currentY - spacing * i * 1.5, dotSize)
+            }
+            for (let i = 1; i <= int(wounded); i++) {
+                fill(c2)
+                circle(currentX, currentY + spacing * i * 1.5, dotSize)
+            }
+
+        })
+        pop()
+
+        drawHtmlHeading()
+    } else {
+        sc = 1;
+        tX = window.innerWidth / 2;
+        tY = window.innerHeight / 2;
     }
 }
 var circles = [];
@@ -660,6 +664,7 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     rectMode(CORNER)
     fill(color)
     stroke(cLight)
+    strokeWeight(0)
     for (let i = 1; i < data / xSize; i++) {
         for (let j = 0; j < xSize; j++) {
             circle(j * rSize + xOff, i * rSize + yOff, rSize)
@@ -683,7 +688,8 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
         }
     }
 
-    fill(0, 0, 0, 150)
+    fill(cLight)
+    stroke(cDark)
     textSize(fontSize2)
     textStyle(BOLD)
     textAlign(RIGHT)
@@ -696,15 +702,14 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
 var state = 0;
 const stateAmount = 4;
 var fontSize1 = window.innerWidth / 35
-var fontSize2 = window.innerWidth / 40
+var fontSize2 = window.innerWidth / 50
 function drawHtmlHeading() {
-    strokeWeight(1)
 
     if (!document.getElementById("heading")) {
         const heading = createDiv("MASS SHOOTINGS 2009 - 2022")
         heading.id("heading")
-        //heading.style("color", "white")
-        heading.style("background-color", "rgb(" + cLight + ")")
+        heading.style("color", "white")
+        heading.style("background-color", "rgb(" + cDark + ")")
         heading.style("width", "fit-content")
         heading.style("font-size", int(fontSize1) + "px")
         heading.style("text-align", "left")
@@ -718,21 +723,27 @@ function drawHtmlHeading() {
         heading.position(windowWidth / 12, 0)
     }
 
-    const stateDiameter = 20;
+    push()
+    strokeWeight(1)
+    stateDiameter = 20;
     ellipseMode(CENTER)
     rectMode(CENTER)
-    const offsetState = 30;
-    const statePadding = 10;
+    offsetState = 30;
+    statePadding = 10;
     fill(cLight)
-    rect(offsetState, windowHeight / 2, stateDiameter * 2, stateAmount * (stateDiameter + statePadding) + statePadding, 20);
+    //rect(offsetState, windowHeight / 2, stateDiameter * 2, stateAmount * (stateDiameter + statePadding) + statePadding, 20);
     for (let index = 0; index < stateAmount; index++) {
         stroke(index === state ? c1 : cDark)
         if (index === state)
-            circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter * 1.4)
+            circle(windowWidth / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, windowHeight - offsetState, stateDiameter * 1.4)
         stroke(cDark)
-        circle(offsetState, windowHeight / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, stateDiameter)
+        circle(windowWidth / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2, windowHeight - offsetState, stateDiameter)
     }
+    pop()
 }
+var stateDiameter = 20;
+var offsetState = 30;
+var statePadding = 10;
 
 function mousePressed() {
     if (mouseY < windowHeight - 120 || mouseX < windowWidth / 2 - 120 || mouseX > windowWidth / 2 + 100) {
@@ -740,6 +751,14 @@ function mousePressed() {
             state = 0
         } else {
             state++
+        }
+        drawStats()
+    } else {
+        for (let index = 0; index < stateAmount; index++) {
+            if (stateDiameter > dist(windowWidth / 2 - (stateAmount * (stateDiameter + statePadding)) / 2 + index * (stateDiameter + statePadding) + stateDiameter / 2 + statePadding / 2,
+                windowHeight - offsetState,
+                mouseX, mouseY))
+                state = index
         }
         drawStats()
     }
@@ -773,11 +792,13 @@ function mouseMoved() {
             }
         }
 
+        const adjsX = currentX * sc
+        console.log(currentX, adjsX, tX, windowWidth / 2)
         // get the date of the mouse
         const mouseDate = dates[
             int(
                 map(mouseX,
-                    currentX, currentX + 365 * (spacing),
+                    adjsX, adjsX + 365 * (spacing) * sc,
                     0, dates.length)
             )
         ]
@@ -788,4 +809,10 @@ function mouseMoved() {
         }
 
     }
+}
+
+function changeSize(event) {
+    sc += event.wheelDeltaY / 3000
+    tX = event.clientX
+    tY = event.clientY
 }
