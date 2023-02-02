@@ -119,11 +119,12 @@ function drawStats() {
         const r_killed = sqrt(killed) / PI * scaleUp * curZoom
         const r_wounded = sqrt(wounded) / PI * scaleUp * curZoom
 
-        //fill(...c2, 20)
-        //strokeWeight(0.2)
-        //circle(pos.x, pos.y, r_wounded)
-        //fill(...c1, 20)
-        //circle(pos.x, pos.y, r_killed)
+        fill(...c2, 20)
+        strokeWeight(0.2)
+        circle(pos.x, pos.y, r_wounded)
+        fill(...c1, 20)
+        circle(pos.x, pos.y, r_killed)
+
         strokeWeight(0.4)
         fill(c2)
         if (r_killed < r_wounded) {
@@ -161,9 +162,9 @@ function drawStats() {
 function drawDistribution(count, pos, radius, size, customBuffer) {
     const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
-        const f = i / count / (customBuffer || (2 + centerBuffer * .04));
+        const f = i / count / (sqrt(sqrt(customBuffer)) * sqrt(sqrt(radius)) || (2 + centerBuffer * .04));
         const angle = i * 1.618033988749895;
-        const dist = f * radius + (customBuffer || centerBuffer);
+        const dist = f * radius + (customBuffer - radius || centerBuffer);
 
         const x = pos.x + cos(angle * TWO_PI) * dist;
         const y = pos.y + sin(angle * TWO_PI) * dist;

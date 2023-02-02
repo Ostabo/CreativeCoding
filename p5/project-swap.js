@@ -112,9 +112,9 @@ const cLight = [250, 250, 250]
 function drawDistribution(count, pos, radius, size, customBuffer) {
     const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
-        const f = i / count / (customBuffer || (2 + centerBuffer * .04));
+        const f = i / count / (sqrt(sqrt(customBuffer)) || (2 + centerBuffer * .04));
         const angle = i * 1.618033988749895;
-        const dist = f * radius + (customBuffer || centerBuffer);
+        const dist = f * radius - (customBuffer || centerBuffer);
 
         const x = pos.x + cos(angle * TWO_PI) * dist;
         const y = pos.y + sin(angle * TWO_PI) * dist;
@@ -178,6 +178,7 @@ function drawStats() {
             circle(pos.x, pos.y, r_wounded)
             fill(...c1, 20)
             circle(pos.x, pos.y, r_killed)
+
             strokeWeight(0.4)
             fill(c2)
             stroke(cDark)
@@ -766,7 +767,7 @@ function mousePressed() {
 
 var dayLabel, dayLabelL;
 function mouseMoved() {
-    if (state === 3) {
+    if (state === 3 && sc === 1) {
         // array of all dates in a year
         const dates = []
         for (let i = 0; i < 12; i++) {
@@ -792,13 +793,11 @@ function mouseMoved() {
             }
         }
 
-        const adjsX = currentX * sc
-        console.log(currentX, adjsX, tX, windowWidth / 2)
         // get the date of the mouse
         const mouseDate = dates[
             int(
                 map(mouseX,
-                    adjsX, adjsX + 365 * (spacing) * sc,
+                    currentX, currentX + 365 * (spacing),
                     0, dates.length)
             )
         ]
@@ -808,7 +807,8 @@ function mouseMoved() {
             //dayLabelL.position(mouseX - 20, windowHeight - 100)
         }
 
-    }
+    } else if (sc !== 1)
+        dayLabel.html("")
 }
 
 function changeSize(event) {
