@@ -63,8 +63,6 @@ function setup() {
     strokeWeight(0.4)
 }
 
-function draw() {
-}
 let first = true
 const scaleUp = 10
 let labelCache = []
@@ -73,6 +71,7 @@ let usaWounded = 0
 function drawStats() {
     if (labelCache.length > 0)
         labelCache.forEach(l => l.remove())
+    drawLegend()
 
     let labelCur = createDiv(sliderYear.value())
     labelCur.style("color", "white")
@@ -171,4 +170,45 @@ function drawDistribution(count, pos, radius, size, customBuffer) {
 
         circle(x, y, size);
     }
+}
+
+function drawLegend() {
+    let legend = createDiv()
+    legend.style("color", "white")
+    legend.style("background-color", "rgb(" + cDark + ")")
+    legend.style("width", "fit-content")
+    legend.style("font-family", "IBM Plex Sans")
+    legend.style("font-size", "12px")
+    legend.style("line-height", "1.5em")
+    legend.style("z-index", "2000")
+    legend.style("text-align", "center")
+    legend.style("padding", "5px")
+    legend.style("border-radius", "5px")
+    legend.style("user-select", "none")
+    legend.position(windowWidth * .1, windowHeight - 150)
+    legend.html(`
+    <div style="display: flex; align-items: center; justify-content: start; gap: 1em">
+        <div style="display: flex; align-items: start">
+            <div style="width: 5px; height: 5px; background-color: ${color(...c1).toString()}; border-radius: 50%; margin: 5px 13px 0 7px"></div>
+            <div>Killed Person</div>
+        </div>
+        <div style="display: flex; align-items: start">
+            <div style="width: 5px; height: 5px; background-color: ${color(...c2).toString()}; border-radius: 50%; margin: 5px 13px 0 7px"></div>
+            <div>Wounded Person</div>
+        </div>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: start; gap: 1em">
+        <div style="display: flex; align-items: start">
+            <div style="width: 20px; height: 20px; background-color: ${color(...c1, 40).toString()}; border-radius: 50%; margin-right: 5px"></div>
+            <div>Killed People</div>
+        </div>
+        <div style="display: flex; align-items: start">
+            <div style="width: 20px; height: 20px; background-color: ${color(...c2, 40).toString()}; border-radius: 50%; margin-right: 5px"></div>
+            <div>Wounded People</div>
+        </div>
+    </div>
+    <div style="padding: 5px">Zoom and hover for more information</div>
+    `)
+
+    labelCache.push(legend)
 }
