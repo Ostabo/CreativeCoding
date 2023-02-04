@@ -135,7 +135,8 @@ const gerHabitants = 83.2;
 
 const spacing = window.innerWidth / (365 * 1.1);
 const dotSize = 2;
-let currentX = window.innerWidth / 32;
+let currentX = window.innerWidth / 24;
+const startCurrentX = window.innerWidth / 24;
 const currentY = window.innerHeight / 2;
 function drawStats() {
     usaKilled = 0, usaWounded = 0, usaPreventable = 0, usaWarning = 0;
@@ -153,6 +154,7 @@ function drawStats() {
         image(staticImg2, smallerScreen(), 0)
     }
     drawHtmlHeading()
+    drawLegend()
 
     usaKilled = 0;
     usaWounded = 0;
@@ -490,7 +492,7 @@ function draw() {
             const { killed, wounded, datePerYear } = e;
             //const diffDays = Math.ceil(Math.abs(datePerYear - lastDate) / (1000 * 60 * 60 * 24))
 
-            let currentX = spacing * datePerYear + windowWidth / 32;
+            let currentX = spacing * datePerYear + startCurrentX;
             //lastDate = datePerYear;
 
             usaKilled += int(killed);
@@ -815,4 +817,123 @@ function changeSize(event) {
     sc += event.wheelDeltaY / 3000
     tX = event.clientX
     tY = event.clientY
+}
+
+function drawLegend() {
+    let legend;
+    if (state === 0 || state === 1) {
+        if (!document.getElementById("legend")) {
+            legend = createDiv()
+            legend.id("legend")
+            legend.style("color", "white")
+            legend.style("background-color", "rgb(" + cDark + ")")
+            legend.style("width", "fit-content")
+            legend.style("font-family", "IBM Plex Sans")
+            legend.style("font-size", "12px")
+            legend.style("line-height", "1.5em")
+            legend.style("z-index", "2000")
+            legend.style("text-align", "center")
+            legend.style("padding", "5px")
+            legend.style("border-radius", "5px")
+            legend.style("user-select", "none")
+        } else {
+            legend = select("#legend")
+        }
+        legend.position(windowWidth * .05, windowHeight - 100)
+        legend.html(`
+        <div style="display: flex; align-items: center; justify-content: start; gap: 1em">
+            <div style="display: flex; align-items: start">
+                <div style="width: 5px; height: 5px; background-color: ${color(...c1).toString()}; border-radius: 50%; margin: 5px 13px 0 7px"></div>
+                <div>Killed Person</div>
+            </div>
+            <div style="display: flex; align-items: start">
+                <div style="width: 5px; height: 5px; background-color: ${color(...c2).toString()}; border-radius: 50%; margin: 5px 13px 0 7px"></div>
+                <div>Wounded Person</div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: start; gap: 1em">
+            <div style="display: flex; align-items: start">
+                <div style="width: 20px; height: 20px; background-color: ${color(...c1, 40).toString()}; border-radius: 50%; margin-right: 5px"></div>
+                <div>Killed People</div>
+            </div>
+            <div style="display: flex; align-items: start">
+                <div style="width: 20px; height: 20px; background-color: ${color(...c2, 40).toString()}; border-radius: 50%; margin-right: 5px"></div>
+                <div>Wounded People</div>
+            </div>
+        </div>
+        `)
+    } else if (state === 2) {
+        if (!document.getElementById("legend")) {
+            legend = createDiv()
+            legend.id("legend")
+            legend.style("color", "white")
+            legend.style("background-color", "rgb(" + cDark + ")")
+            legend.style("width", "fit-content")
+            legend.style("font-family", "IBM Plex Sans")
+            legend.style("font-size", "12px")
+            legend.style("line-height", "1.5em")
+            legend.style("z-index", "2000")
+            legend.style("text-align", "center")
+            legend.style("padding", "5px")
+            legend.style("border-radius", "5px")
+            legend.style("user-select", "none")
+        } else {
+            legend = select("#legend")
+        }
+        legend.position(windowWidth * .1, windowHeight - 100)
+        legend.html(`
+        <div style="display: flex; align-items: center; justify-content: start; gap: 1em">
+            <div style="display: flex; align-items: start">
+                <div style="width: 5px; height: 5px; background-color: ${color(...c1).toString()}; border-radius: 50%; margin: 5px 13px 0 7px"></div>
+                <div>Killed Person</div>
+            </div>
+            <div style="display: flex; align-items: start">
+                <div style="width: 5px; height: 5px; background-color: ${color(...c2).toString()}; border-radius: 50%; margin: 5px 13px 0 7px"></div>
+                <div>Wounded Person</div>
+            </div>
+        </div>
+        `)
+    } else if (state === 3) {
+        if (!document.getElementById("legend")) {
+            legend = createDiv()
+            legend.id("legend")
+            legend.style("color", "white")
+            legend.style("background-color", "rgb(" + cDark + ")")
+            legend.style("width", "fit-content")
+            legend.style("font-family", "IBM Plex Sans")
+            legend.style("font-size", "12px")
+            legend.style("line-height", "1.5em")
+            legend.style("z-index", "2000")
+            legend.style("text-align", "center")
+            legend.style("padding", "5px")
+            legend.style("border-radius", "5px")
+            legend.style("user-select", "none")
+        } else {
+            legend = select("#legend")
+        }
+        legend.position(windowWidth * .7, 35/*windowHeight - 100*/)
+        legend.html(`
+        <div style="display: flex; align-items: center; justify-content: start; gap: 1em">
+            <div style="display: flex; align-items: start">
+                <div style="width: 5px; height: 5px; background-color: ${color(...c1).toString()}; border-radius: 50%; margin: 5px 13px 0 7px"></div>
+                <div>Killed Person</div>
+            </div>
+            <div style="display: flex; align-items: start">
+                <div style="width: 5px; height: 5px; background-color: ${color(...c2).toString()}; border-radius: 50%; margin: 5px 13px 0 7px"></div>
+                <div>Wounded Person</div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: start">
+            <div style="width: 5px; height: 5px; background-color: ${color(...cLight).toString()}; border-radius: 50%; margin: 5px 13px 0 7px"></div>
+            <div>Day in Year</div>
+            <div style="width: 5px; height: 1px; background-color: ${color(...cLight).toString()}; margin: 10px 12px 10px 28px"></div>
+            <div>Month in Year</div>
+        </div>
+        <div style="padding: 2px; text-align: right">Hover in default view for date</div>
+        <div style="padding: 2px; text-align: right">Scroll to zoom in/out</div>
+        `)
+    } else {
+        if (document.getElementById("legend"))
+            select("#legend").remove()
+    }
 }

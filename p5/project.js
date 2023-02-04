@@ -161,9 +161,9 @@ function drawStats() {
 function drawDistribution(count, pos, radius, size, customBuffer) {
     const centerBuffer = count > 6 ? curZoom * 1.5 : 2;
     for (let i = 0; i < count; i++) {
-        const f = i / count / (sqrt(sqrt(customBuffer)) * sqrt(sqrt(radius)) || (2 + centerBuffer * .04));
+        const f = i / count / (sqrt(sqrt(customBuffer)) || (2 + centerBuffer * .04));
         const angle = i * 1.618033988749895;
-        const dist = f * radius + (customBuffer - radius || centerBuffer);
+        const dist = f * radius - (customBuffer || centerBuffer);
 
         const x = pos.x + cos(angle * TWO_PI) * dist;
         const y = pos.y + sin(angle * TWO_PI) * dist;
