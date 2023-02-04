@@ -149,13 +149,13 @@ function drawStats() {
     background(cDark)
     imageMode(CENTER)
     //image(staticImg, smallerScreen(), 0)
-    image(staticImg, windowWidth / 2, windowHeight / 2)
+    image(staticImg, windowWidth < 1280 ? windowWidth / 2 : 640, windowHeight / 2)
 
     if (state === 1) {
         clear()
         background(cDark)
         //image(staticImg2, smallerScreen(), 0)
-        image(staticImg2, windowWidth / 2, windowHeight / 2)
+        image(staticImg2, windowWidth < 1280 ? windowWidth / 2 : 640, windowHeight / 2)
     }
     drawHtmlHeading()
     drawLegend()
@@ -239,16 +239,16 @@ function drawStats() {
         background(cDark)
         drawHtmlHeading()
 
-        const rSize = windowWidth / 150
+        const rSize = min(windowWidth, windowHeight) / 150
         const bCount = 50
-        const xOff = windowWidth / 4 - bCount / 2 * rSize * .75
+        const xOff = min(windowWidth, windowHeight) / 4 - bCount / 2 * rSize
         drawRects(c1, rSize, bCount,
             xOff,
-            windowHeight / 4,
+            windowHeight / 4 - rSize * 2,
             usaKilled, false)
         drawRects(c2, rSize, bCount,
             xOff,
-            windowHeight / 4 + rSize * 32,
+            windowHeight / 4 + rSize * 35 + 1,
             usaWounded, true)
         drawRects(c3, rSize, bCount,
             xOff,
@@ -256,15 +256,15 @@ function drawStats() {
             gerKilled, false)
         drawRects(c4, rSize, bCount,
             xOff,
-            windowHeight - windowHeight / 4 + rSize * 4,
+            windowHeight - windowHeight / 4 + rSize * 4 + 1,
             gerWounded, true)
         textAlign(LEFT)
         textSize(fontSize1)
         fill(cLight)
-        text("TOTAL", xOff, windowHeight / 4 - rSize * 5)
+        text("TOTAL", xOff, windowHeight / 4 - rSize * 8)
         push()
         rotate(PI / 2)
-        text("USA", windowHeight / 4 + rSize * 27.5, - windowWidth + xOff * .75)
+        text("USA", windowHeight / 4 + rSize * 31.5, - windowWidth + xOff * .75)
         pop()
         textAlign(LEFT)
 
@@ -275,11 +275,11 @@ function drawStats() {
         const xOff2 = windowWidth / 4 + bCount / 2 * rSize * 1.75
         drawRects(c1, rSize, bCount,
             xOff2,
-            windowHeight / 4 + rSize * 32,
+            windowHeight / 4 + rSize * 35,
             usaKilledPerTHabi, false)
         drawRects(c2, rSize, bCount,
             xOff2,
-            windowHeight / 4 + rSize * 32,
+            windowHeight / 4 + rSize * 35,
             usaWoundedPerTHabi, true)
         drawRects(c3, rSize, bCount,
             xOff2,
@@ -292,7 +292,7 @@ function drawStats() {
         textAlign(LEFT)
         textSize(fontSize1)
         fill(cLight)
-        text("PER 100K HABITANTS", xOff2, windowHeight / 4 - rSize * 5)
+        text("PER 100.000 HABITANTS", xOff2, windowHeight / 4 - rSize * 8)
         push()
         rotate(PI / 2)
         text("GERMANY", windowHeight - windowHeight / 4 - rSize * 10, - windowWidth + xOff * .75)
@@ -674,21 +674,21 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     strokeWeight(0)
     for (let i = 1; i < data / xSize; i++) {
         for (let j = 0; j < xSize; j++) {
-            circle(j * rSize + xOff, i * rSize + yOff, rSize)
+            circle(j * (rSize + 1) + xOff, i * (rSize + 1) + yOff, rSize)
             //rect(j * rSize + xOff, i * rSize + yOff, rSize, rSize)
         }
     }
-    const calcY = inverted ? yOff + int(data / xSize + 1) * rSize : yOff
+    const calcY = inverted ? yOff + int(data / xSize + 1) * (rSize + 1) : yOff
     const leftOver = data % xSize
     for (let i = 0; i < leftOver; i++) {
         const leftOverF = leftOver - floor(leftOver);
         if (i >= leftOver - 1 && leftOverF > 0) {
-            circle(i * rSize + xOff, calcY, rSize * leftOverF)
+            circle(i * (rSize + 1) + xOff, calcY, rSize * leftOverF)
             //rect(i * rSize + xOff,
             //    calcY,
             //    rSize * leftOverF, rSize)
         } else {
-            circle(i * rSize + xOff, calcY, rSize)
+            circle(i * (rSize + 1) + xOff, calcY, rSize)
             //rect(i * rSize + xOff,
             //    calcY,
             //    rSize, rSize)
@@ -700,7 +700,7 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     textSize(fontSize2)
     textStyle(BOLD)
     textAlign(RIGHT)
-    const yCalc = inverted ? yOff + 4 * rSize : yOff + data / xSize * rSize - rSize / 2
+    const yCalc = inverted ? yOff + 4 * (rSize - 1) : yOff + data / xSize * (rSize + 1) - (rSize + 1) / 2
     text(data, xOff - rSize, yCalc)
     rectMode(CENTER)
     fill(cDark)
