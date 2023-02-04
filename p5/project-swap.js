@@ -241,30 +241,30 @@ function drawStats() {
 
         const rSize = min(windowWidth, windowHeight) / 150
         const bCount = 50
-        const xOff = min(windowWidth, windowHeight) / 4 - bCount / 2 * rSize
+        const xOff = min(windowWidth, windowHeight) / 4 - bCount / 2 * rSize * .85
         drawRects(c1, rSize, bCount,
             xOff,
-            windowHeight / 4 - rSize * 2,
+            min(windowWidth, windowHeight) / 4 - (rSize + 1) * 3,
             usaKilled, false)
         drawRects(c2, rSize, bCount,
             xOff,
-            windowHeight / 4 + rSize * 35 + 1,
+            min(windowWidth, windowHeight) / 4 + (rSize + 1) * 29,
             usaWounded, true)
         drawRects(c3, rSize, bCount,
             xOff,
-            windowHeight - windowHeight / 4 + rSize * 3,
+            min(windowWidth, windowHeight) - min(windowWidth, windowHeight) / 4 + (rSize + 1) * 3,
             gerKilled, false)
         drawRects(c4, rSize, bCount,
             xOff,
-            windowHeight - windowHeight / 4 + rSize * 4 + 1,
+            min(windowWidth, windowHeight) - min(windowWidth, windowHeight) / 4 + (rSize + 1) * 4 + 1,
             gerWounded, true)
         textAlign(LEFT)
         textSize(fontSize1)
         fill(cLight)
-        text("TOTAL", xOff, windowHeight / 4 - rSize * 8)
+        text("TOTAL", xOff, min(windowWidth, windowHeight) / 4 - rSize * 8)
         push()
         rotate(PI / 2)
-        text("USA", windowHeight / 4 + rSize * 31.5, - windowWidth + xOff * .75)
+        text("USA", min(windowWidth, windowHeight) / 4 + rSize * 31.5, - windowWidth + xOff * .75)
         pop()
         textAlign(LEFT)
 
@@ -272,30 +272,30 @@ function drawStats() {
         const usaWoundedPerTHabi = round(usaWounded / usaHabitants * 10, 2);
         const gerKilledPerTHabi = round(gerKilled / gerHabitants * 10, 2);
         const gerWoundedPerTHabi = round(gerWounded / gerHabitants * 10, 2);
-        const xOff2 = windowWidth / 4 + bCount / 2 * rSize * 1.75
+        const xOff2 = min(windowWidth, windowHeight) / 4 + bCount / 2 * rSize * 2
         drawRects(c1, rSize, bCount,
             xOff2,
-            windowHeight / 4 + rSize * 35,
+            min(windowWidth, windowHeight) / 4 + rSize * 35,
             usaKilledPerTHabi, false)
         drawRects(c2, rSize, bCount,
             xOff2,
-            windowHeight / 4 + rSize * 35,
+            min(windowWidth, windowHeight) / 4 + rSize * 35,
             usaWoundedPerTHabi, true)
         drawRects(c3, rSize, bCount,
             xOff2,
-            windowHeight - windowHeight / 4 + rSize * 4,
+            min(windowWidth, windowHeight) - min(windowWidth, windowHeight) / 4 + (rSize + 1) * 4,
             gerKilledPerTHabi, false)
         drawRects(c4, rSize, bCount,
             xOff2,
-            windowHeight - windowHeight / 4 + rSize * 4,
+            min(windowWidth, windowHeight) - min(windowWidth, windowHeight) / 4 + (rSize + 1) * 4,
             gerWoundedPerTHabi, true)
         textAlign(LEFT)
         textSize(fontSize1)
         fill(cLight)
-        text("PER 100.000 HABITANTS", xOff2, windowHeight / 4 - rSize * 8)
+        text("PER 100.000 HABITANTS", xOff2, min(windowWidth, windowHeight) / 4 - rSize * 8)
         push()
         rotate(PI / 2)
-        text("GERMANY", windowHeight - windowHeight / 4 - rSize * 10, - windowWidth + xOff * .75)
+        text("GERMANY", min(windowWidth, windowHeight) - min(windowWidth, windowHeight) / 4 - rSize * 10, - windowWidth + xOff * .75)
         pop()
     }
     if (state === 5) {
@@ -708,8 +708,8 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
 
 var state = 0;
 const stateAmount = 4;
-var fontSize1 = window.innerWidth / 35
-var fontSize2 = window.innerWidth / 50
+var fontSize1 = window.innerWidth > window.innerHeight ? window.innerHeight / 35 : window.innerWidth / 35
+var fontSize2 = window.innerWidth > window.innerHeight ? window.innerHeight / 50 : window.innerWidth / 50
 function drawHtmlHeading() {
 
     if (!document.getElementById("heading")) {
