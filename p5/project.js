@@ -24,7 +24,8 @@ const c5 = [200, 0, 0]
 const c6 = [240, 240, 0]
 const c7 = [0, 200, 200]
 const c8 = [0, 0, 200]
-const cDark = [20, 20, 20]
+const cDark = [38, 38, 38]
+const cLegend = [20, 20, 20]
 const cLight = [250, 250, 250]
 
 let myMap;
@@ -175,7 +176,7 @@ function drawDistribution(count, pos, radius, size, customBuffer) {
 function drawLegend() {
     let legend = createDiv()
     legend.style("color", "white")
-    legend.style("background-color", "rgb(" + cDark + ")")
+    legend.style("background-color", "rgb(" + cLegend + ")")
     legend.style("width", "fit-content")
     legend.style("font-family", "IBM Plex Sans")
     legend.style("font-size", "12px")

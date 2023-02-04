@@ -108,6 +108,7 @@ const c6 = [255, 255, 26]
 const c7 = [150, 250, 0]
 const c8 = [176, 224, 255]
 const cDark = [38, 38, 38]
+const cLegend = [20, 20, 20]
 const cLight = [250, 250, 250]
 
 function drawDistribution(count, pos, radius, size, customBuffer) {
@@ -830,7 +831,7 @@ function drawLegend() {
             legend = createDiv()
             legend.id("legend")
             legend.style("color", "white")
-            legend.style("background-color", "rgb(" + cDark + ")")
+            legend.style("background-color", "rgb(" + cLegend + ")")
             legend.style("width", "fit-content")
             legend.style("font-family", "IBM Plex Sans")
             legend.style("font-size", "12px")
@@ -871,7 +872,7 @@ function drawLegend() {
             legend = createDiv()
             legend.id("legend")
             legend.style("color", "white")
-            legend.style("background-color", "rgb(" + cDark + ")")
+            legend.style("background-color", "rgb(" + cLegend + ")")
             legend.style("width", "fit-content")
             legend.style("font-family", "IBM Plex Sans")
             legend.style("font-size", "12px")
@@ -902,7 +903,7 @@ function drawLegend() {
             legend = createDiv()
             legend.id("legend")
             legend.style("color", "white")
-            legend.style("background-color", "rgb(" + cDark + ")")
+            legend.style("background-color", "rgb(" + cLegend + ")")
             legend.style("width", "fit-content")
             legend.style("font-family", "IBM Plex Sans")
             legend.style("font-size", "12px")
@@ -933,8 +934,8 @@ function drawLegend() {
             <div style="width: 5px; height: 1px; background-color: ${color(...cLight).toString()}; margin: 10px 12px 10px 28px"></div>
             <div>Month in Year</div>
         </div>
-        <div style="padding: 2px; text-align: right">Hover in default view for date</div>
-        <div style="padding: 2px; text-align: right">Scroll to zoom in/out</div>
+        <div style="padding: 2px 0 2px 5px; text-align: left">Hover in default view for date</div>
+        <div style="padding: 2px 0 2px 5px; text-align: left">Scroll to zoom in/out</div>
         `)
     } else {
         if (document.getElementById("legend"))
