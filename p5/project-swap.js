@@ -753,7 +753,7 @@ var offsetState = 30;
 var statePadding = 10;
 
 function mousePressed() {
-    if (mouseY < windowHeight - 120 || mouseX < windowWidth / 2 - 120 || mouseX > windowWidth / 2 + 100) {
+    if (mouseY < windowHeight - 50 || mouseX < windowWidth / 2 - 100 || mouseX > windowWidth / 2 + 100) {
         if (state === stateAmount - 1) {
             state = 0
         } else {
