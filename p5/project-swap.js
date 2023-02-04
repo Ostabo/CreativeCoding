@@ -13,7 +13,8 @@ function preload() {
     font1 = loadFont('IBMPlexSans-Italic.otf');
     font2 = loadFont('IBMPlexSans-TextItalic.otf');
 
-    const [width, height] = [976 + smallerScreen() * 2, 925]
+    //const [width, height] = [976 + smallerScreen() * 2, 925]
+    const [width, height] = [windowWidth, windowHeight]
 
     const options = {
         lat: 40,
@@ -146,12 +147,15 @@ function drawStats() {
     //sliderYear.style("opacity", "0")
     clear()
     background(cDark)
-    image(staticImg, smallerScreen(), 0)
+    imageMode(CENTER)
+    //image(staticImg, smallerScreen(), 0)
+    image(staticImg, windowWidth / 2, windowHeight / 2)
 
     if (state === 1) {
         clear()
         background(cDark)
-        image(staticImg2, smallerScreen(), 0)
+        //image(staticImg2, smallerScreen(), 0)
+        image(staticImg2, windowWidth / 2, windowHeight / 2)
     }
     drawHtmlHeading()
     drawLegend()
