@@ -74,7 +74,7 @@ function setup() {
     //sliderYear = createSlider(2009, 2022, 0)
     //sliderYear.position(windowWidth / 2 - 100, windowHeight - 60)
     //sliderYear.input(drawStats)
-    dayLabelL = createDiv('Month/Day')
+    dayLabelL = createDiv('DAY/MONTH')
     dayLabelL.style("color", "white")
     dayLabelL.style("font-size", int(fontSize1) + "px")
     dayLabelL.style("text-align", "left")
@@ -264,8 +264,10 @@ function drawStats() {
         fill(cLight)
         text("TOTAL", xOff, min(windowWidth, windowHeight) / 4 - rSize * 8)
         push()
-        rotate(PI / 2)
-        text("USA", min(windowWidth, windowHeight) / 4 + rSize * 31.5, - windowWidth + xOff * .75)
+        //rotate(PI / 2)
+        textAlign(RIGHT)
+        textSize(fontSize2)
+        text("USA", windowWidth - xOff * .5, min(windowWidth, windowHeight) / 4 + rSize * 36)
         pop()
         textAlign(LEFT)
 
@@ -295,8 +297,10 @@ function drawStats() {
         fill(cLight)
         text("PER 100.000 HABITANTS", xOff2, min(windowWidth, windowHeight) / 4 - rSize * 8)
         push()
-        rotate(PI / 2)
-        text("GERMANY", min(windowWidth, windowHeight) - min(windowWidth, windowHeight) / 4 - rSize * 10, - windowWidth + xOff * .75)
+        //rotate(PI / 2)
+        textAlign(RIGHT)
+        textSize(fontSize2)
+        text("GERMANY", windowWidth - xOff * .5, min(windowWidth, windowHeight) - min(windowWidth, windowHeight) / 4 + (rSize + 1) * 5)
         pop()
     }
     if (state === 5) {
@@ -702,7 +706,7 @@ function drawRects(color, rSize, xSize, xOff, yOff, data, inverted) {
     textStyle(BOLD)
     textAlign(RIGHT)
     const yCalc = inverted ? yOff + 4 * (rSize - 1) : yOff + data / xSize * (rSize + 1) - (rSize + 1) / 2
-    text(data, xOff - rSize, yCalc)
+    text(data, xOff - rSize * 2, yCalc)
     rectMode(CENTER)
     fill(cDark)
 }
@@ -717,7 +721,7 @@ function drawHtmlHeading() {
         const heading = createDiv("MASS SHOOTINGS 2009 - 2022")
         heading.id("heading")
         heading.style("color", "white")
-        heading.style("background-color", "rgb(" + cDark + ")")
+        //heading.style("background-color", "rgb(" + cDark + ")")
         heading.style("width", "fit-content")
         heading.style("font-size", int(fontSize1) + "px")
         heading.style("text-align", "left")
@@ -796,7 +800,7 @@ function mouseMoved() {
                     break
                 }
 
-                dates.push(`${i + 1}/${j + 1}`)
+                dates.push(`${j + 1 < 10 ? '0' : ''}${j + 1}/${i + 1}`)
             }
         }
 
