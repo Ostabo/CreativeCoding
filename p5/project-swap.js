@@ -275,7 +275,7 @@ function drawStats() {
         const usaWoundedPerTHabi = round(usaWounded / usaHabitants * 10, 2);
         const gerKilledPerTHabi = round(gerKilled / gerHabitants * 10, 2);
         const gerWoundedPerTHabi = round(gerWounded / gerHabitants * 10, 2);
-        const xOff2 = min(windowWidth, windowHeight) / 4 + bCount / 2 * rSize * 2
+        const xOff2 = min(windowWidth, windowHeight) / 4 + bCount / 2 * rSize * 2.25
         drawRects(c1, rSize, bCount,
             xOff2,
             min(windowWidth, windowHeight) / 4 + rSize * 35,
